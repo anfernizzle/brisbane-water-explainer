@@ -211,9 +211,18 @@ export function Calculator() {
             </label>
           )}
           <p className="hint">
-            Based on spring usage (mid-Feb → mid-Jun). Exact band refresh rules
-            are not fully published — enter what your bill shows or pick a
-            band.
+            From the City{" "}
+            <a
+              href="https://www.brisbaneca.gov/513/Capital-Projects-Charge"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Capital Projects Charge
+            </a>{" "}
+            page: graduated by springtime usage (mid-February – mid-June), per
+            2-month cycle (2022 adopted rates). How multiple spring periods
+            combine into one band is not fully specified — enter what your bill
+            shows or pick a band.
           </p>
         </fieldset>
 
@@ -227,7 +236,7 @@ export function Calculator() {
                 checked={droughtMode === "below"}
                 onChange={() => setDroughtMode("below")}
               />
-              Below median ($2.32)
+              Below median — $2.32
             </label>
             <label>
               <input
@@ -236,7 +245,7 @@ export function Calculator() {
                 checked={droughtMode === "above"}
                 onChange={() => setDroughtMode("above")}
               />
-              Above median ($6.99)
+              Above median — $6.99
             </label>
             <label>
               <input
@@ -261,8 +270,17 @@ export function Calculator() {
             </label>
           )}
           <p className="hint">
-            Median threshold is currently 12 units yearly average. Exact average
-            window is unpublished — use the amount on your bill if unsure.
+            From the City{" "}
+            <a
+              href="https://www.brisbaneca.gov/512/Drought-Contingency-Charge"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Drought Contingency Charge
+            </a>{" "}
+            page: $2.32 / $6.99 per billing when yearly average is below / above
+            the median (currently 12 units). Exact yearly-average window is
+            unpublished — use the amount on your bill if unsure.
           </p>
         </fieldset>
       </section>

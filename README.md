@@ -44,8 +44,8 @@ npx vercel
 
 ## Sources
 
+- [Capital Projects Charge](https://www.brisbaneca.gov/513/Capital-Projects-Charge) (official)
+- [Drought Contingency Charge](https://www.brisbaneca.gov/512/Drought-Contingency-Charge) (official)
 - [Residential water rates](https://www.brisbaneca.gov/514/Water-Rate-Table---Residential)
 - [Sewer rates](https://www.brisbaneca.gov/517/Sewer-Rate-Table---Residential-Commercia)
-- [Capital Projects Charge](https://www.brisbaneca.gov/513/Capital-Projects-Charge)
-- [Drought Contingency Charge](https://www.brisbaneca.gov/512/Drought-Contingency-Charge)
 - [Prop 218 notice (2023–2027)](https://www.brisbaneca.gov/DocumentCenter/View/1573)

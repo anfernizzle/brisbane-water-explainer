@@ -115,7 +115,12 @@ export const SEWER_RATES: Record<
   2027: { fixed: 153.66, variable: 18.67 },
 };
 
-/** Capital Projects Charge presets (2022 adopted spring-usage bands). */
+/**
+ * Capital Projects Charge presets — Current Rate (Adopted 2022) from
+ * https://www.brisbaneca.gov/513/Capital-Projects-Charge
+ * (graduated by springtime usage mid-Feb–mid-Jun; per 2-month cycle).
+ * Manual/preset only — page does not fully specify multi-period combination.
+ */
 export const CAPITAL_PRESETS = [
   { id: "0", label: "0 units — $20", amount: 20 },
   { id: "1", label: "1 unit — $25", amount: 25 },
@@ -128,25 +133,39 @@ export const CAPITAL_PRESETS = [
   { id: "8", label: "8 units — $60", amount: 60 },
   { id: "9", label: "9 units — $65", amount: 65 },
   { id: "10", label: "10 units — $70", amount: 70 },
-  { id: "11-19", label: "11–19 units — $76", amount: 76 },
-  { id: "20-40", label: "20–40 units — $100", amount: 100 },
-  { id: ">40", label: ">40 units — $130", amount: 130 },
+  { id: "11-19", label: "11 to 19 units — $76", amount: 76 },
+  { id: "20-40", label: "20 to 40 units — $100", amount: 100 },
+  { id: ">40", label: "Greater than 40 units — $130", amount: 130 },
 ] as const;
 
+/**
+ * Drought Contingency Charge presets from
+ * https://www.brisbaneca.gov/512/Drought-Contingency-Charge
+ * (per billing / 2-month cycle). Landscape $102.14 omitted (residential only).
+ */
 export const DROUGHT_PRESETS = [
   {
     id: "below",
-    label: "Below median (≤12 units) — $2.32",
+    label: "Below median (currently 12 units) — $2.32",
     amount: 2.32,
   },
   {
     id: "above",
-    label: "Above median (>12 units) — $6.99",
+    label: "Above median (currently 12 units) — $6.99",
     amount: 6.99,
   },
 ] as const;
 
+/** Official City + Prop 218 citations shown in the disclaimer. */
 export const SOURCE_LINKS = [
+  {
+    label: "Capital Projects Charge (official)",
+    href: "https://www.brisbaneca.gov/513/Capital-Projects-Charge",
+  },
+  {
+    label: "Drought Contingency Charge (official)",
+    href: "https://www.brisbaneca.gov/512/Drought-Contingency-Charge",
+  },
   {
     label: "Residential water rate table",
     href: "https://www.brisbaneca.gov/514/Water-Rate-Table---Residential",
@@ -154,14 +173,6 @@ export const SOURCE_LINKS = [
   {
     label: "Sewer rate table",
     href: "https://www.brisbaneca.gov/517/Sewer-Rate-Table---Residential-Commercia",
-  },
-  {
-    label: "Capital Projects Charge",
-    href: "https://www.brisbaneca.gov/513/Capital-Projects-Charge",
-  },
-  {
-    label: "Drought Contingency Charge",
-    href: "https://www.brisbaneca.gov/512/Drought-Contingency-Charge",
   },
   {
     label: "Prop 218 notice (2023–2027 maxima)",
