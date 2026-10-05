@@ -31,22 +31,37 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: "var(--font-figtree), Figtree, sans-serif",
+    fontFamily: "var(--font-google-sans), 'Google Sans', sans-serif",
     h1: {
-      fontFamily: "var(--font-figtree), Figtree, sans-serif",
+      fontFamily: "var(--font-outfit), Outfit, sans-serif",
       fontWeight: 700,
       letterSpacing: "-0.02em",
     },
     h2: {
+      fontFamily: "var(--font-outfit), Outfit, sans-serif",
       fontWeight: 650,
       letterSpacing: "-0.015em",
+    },
+    h3: {
+      fontFamily: "var(--font-outfit), Outfit, sans-serif",
+      fontWeight: 650,
+    },
+    subtitle1: {
+      fontFamily: "var(--font-outfit), Outfit, sans-serif",
+      fontWeight: 650,
+    },
+    subtitle2: {
+      fontFamily: "var(--font-outfit), Outfit, sans-serif",
+      fontWeight: 650,
     },
     button: {
       textTransform: "none",
       fontWeight: 600,
+      fontFamily: "var(--font-google-sans), 'Google Sans', sans-serif",
     },
     overline: {
       letterSpacing: "0.08em",
+      fontFamily: "var(--font-outfit), Outfit, sans-serif",
     },
   },
   shape: {
@@ -78,7 +93,7 @@ const theme = createTheme({
         tooltip: {
           fontSize: "0.8rem",
           lineHeight: 1.4,
-          maxWidth: 280,
+          maxWidth: 300,
           backgroundColor: "#243038",
         },
         arrow: {
@@ -90,6 +105,15 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: "none",
+        },
+      },
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: {
+          textTransform: "none",
+          fontWeight: 600,
+          px: 1.5,
         },
       },
     },

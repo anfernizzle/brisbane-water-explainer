@@ -119,7 +119,8 @@ export const SEWER_RATES: Record<
  * Capital Projects Charge presets — Current Rate (Adopted 2022) from
  * https://www.brisbaneca.gov/513/Capital-Projects-Charge
  * (graduated by springtime usage mid-Feb–mid-Jun; per 2-month cycle).
- * Manual/preset only — page does not fully specify multi-period combination.
+ * Calculator auto-suggests from entered water-use as a proxy when spring
+ * average is unknown; user can override.
  */
 export const CAPITAL_PRESETS = [
   { id: "0", label: "0 units — $20", amount: 20 },
@@ -142,6 +143,8 @@ export const CAPITAL_PRESETS = [
  * Drought Contingency Charge presets from
  * https://www.brisbaneca.gov/512/Drought-Contingency-Charge
  * (per billing / 2-month cycle). Landscape $102.14 omitted (residential only).
+ * Calculator auto-suggests below/above median (12) from the water-use proxy;
+ * user can override.
  */
 export const DROUGHT_PRESETS = [
   {

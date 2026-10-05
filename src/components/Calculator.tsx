@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Box,
+  Button,
+  Chip,
   Collapse,
   FormControl,
   FormControlLabel,
@@ -22,9 +24,12 @@ import {
   TableHead,
   TableRow,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from "@mui/material";
+import { LineChart } from "@mui/x-charts/LineChart";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
@@ -32,6 +37,7 @@ import {
   faCircleInfo,
   faCompress,
   faExpand,
+  faRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   calculateBill,
@@ -49,9 +55,10 @@ import {
   type MeterSize,
   type RateYear,
 } from "@/lib/rates";
+import { suggestCapitalBand, suggestDroughtTier } from "@/lib/suggestions";
 
-type CapitalMode = "preset" | "manual";
 type DroughtMode = "below" | "above" | "manual";
+type ResultView = "bill" | "years";
 
 function InfoTip({ title }: { title: ReactNode }) {
   return (
@@ -72,13 +79,7 @@ function InfoTip({ title }: { title: ReactNode }) {
   );
 }
 
-function FieldLabel({
-  label,
-  tip,
-}: {
-  label: string;
-  tip: ReactNode;
-}) {
+function FieldLabel({ label, tip }: { label: string; tip: ReactNode }) {
   return (
     <Stack direction="row" sx={{ mb: 0.35, alignItems: "center" }}>
       <Typography
@@ -105,39 +106,66 @@ export function Calculator() {
     String(DEFAULT_INPUTS.winterSewerAvgCcf),
   );
 
-  const [capitalMode, setCapitalMode] = useState<CapitalMode>("preset");
+  const [capitalOverride, setCapitalOverride] = useState(false);
   const [capitalPresetId, setCapitalPresetId] = useState("11-19");
-  const [capitalManual, setCapitalManual] = useState(
+  const [capitalManual, setCapitalManual] = useState(false);
+  const [capitalManualAmount, setCapitalManualAmount] = useState(
     String(DEFAULT_INPUTS.capitalAmount),
   );
 
+  const [droughtOverride, setDroughtOverride] = useState(false);
   const [droughtMode, setDroughtMode] = useState<DroughtMode>("above");
   const [droughtManual, setDroughtManual] = useState(
     String(DEFAULT_INPUTS.droughtAmount),
   );
 
   const [inputsOpen, setInputsOpen] = useState(true);
+  const [resultView, setResultView] = useState<ResultView>("bill");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const inputsAnchorRef = useRef<HTMLDivElement | null>(null);
-  const userToggledRef = useRef(false);
 
-  const capitalAmount =
-    capitalMode === "preset"
-      ? (CAPITAL_PRESETS.find((p) => p.id === capitalPresetId)?.amount ?? 76)
-      : Number(capitalManual) || 0;
+  const usageNum = Number(waterUseCcf) || 0;
+  const capitalSuggested = useMemo(
+    () => suggestCapitalBand(usageNum),
+    [usageNum],
+  );
+  const droughtSuggested = useMemo(
+    () => suggestDroughtTier(usageNum),
+    [usageNum],
+  );
+
+  // Keep auto selection in sync until the user overrides.
+  useEffect(() => {
+    if (!capitalOverride && !capitalManual) {
+      setCapitalPresetId(capitalSuggested.id);
+    }
+  }, [capitalSuggested.id, capitalOverride, capitalManual]);
+
+  useEffect(() => {
+    if (!droughtOverride) {
+      setDroughtMode(droughtSuggested.id);
+    }
+  }, [droughtSuggested.id, droughtOverride]);
+
+  const capitalAmount = capitalManual
+    ? Number(capitalManualAmount) || 0
+    : capitalOverride
+      ? (CAPITAL_PRESETS.find((p) => p.id === capitalPresetId)?.amount ??
+        capitalSuggested.amount)
+      : capitalSuggested.amount;
 
   const droughtAmount =
-    droughtMode === "below"
-      ? 2.32
-      : droughtMode === "above"
-        ? 6.99
-        : Number(droughtManual) || 0;
+    droughtMode === "manual"
+      ? Number(droughtManual) || 0
+      : droughtMode === "below"
+        ? 2.32
+        : 6.99;
 
   const inputs: BillInputs = useMemo(
     () => ({
       rateYear,
       meterSize,
-      waterUseCcf: Number(waterUseCcf) || 0,
+      waterUseCcf: usageNum,
       winterSewerAvgCcf: Number(winterSewerAvgCcf) || 0,
       capitalAmount,
       droughtAmount,
@@ -145,7 +173,7 @@ export function Calculator() {
     [
       rateYear,
       meterSize,
-      waterUseCcf,
+      usageNum,
       winterSewerAvgCcf,
       capitalAmount,
       droughtAmount,
@@ -168,36 +196,23 @@ export function Calculator() {
   const lineItems = result.lines.filter((l) => l.id !== "total");
   const totalLine = result.lines.find((l) => l.id === "total")!;
 
-  // Auto-collapse when the inputs block scrolls out of view (user appears done).
   useEffect(() => {
     const el = inputsAnchorRef.current;
     if (!el) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry) return;
-        // Only auto-collapse when scrolling away; don't fight a manual expand.
         if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
-          setInputsOpen((open) => {
-            if (open && !userToggledRef.current) return false;
-            if (open) {
-              // Even after a manual expand, collapsing on scroll-away is desired.
-              return false;
-            }
-            return open;
-          });
-          userToggledRef.current = false;
+          setInputsOpen(false);
         }
       },
       { threshold: 0, rootMargin: "-8% 0px 0px 0px" },
     );
-
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
   function toggleInputs() {
-    userToggledRef.current = true;
     setInputsOpen((v) => !v);
   }
 
@@ -205,7 +220,25 @@ export function Calculator() {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
+  function resetCapitalSuggested() {
+    setCapitalOverride(false);
+    setCapitalManual(false);
+    setCapitalPresetId(capitalSuggested.id);
+  }
+
+  function resetDroughtSuggested() {
+    setDroughtOverride(false);
+    setDroughtMode(droughtSuggested.id);
+  }
+
   const collapsedSummary = `${rateYear} · ${meterSize} · ${waterUseCcf || 0} ccf · winter ${winterSewerAvgCcf || 0} · capital ${formatMoney(capitalAmount)} · drought ${formatMoney(droughtAmount)}`;
+
+  const chartYears = projections.map((p) => p.rateYear);
+  const chartTotal = projections.map((p) => p.result.total);
+  const chartWater = projections.map(
+    (p) => p.result.waterUse + p.result.waterService,
+  );
+  const chartSewer = projections.map((p) => p.result.sewer);
 
   return (
     <Stack spacing={1.5} className="calculator">
@@ -221,15 +254,27 @@ export function Calculator() {
       >
         <Box
           ref={inputsAnchorRef}
+          component="button"
+          type="button"
+          onClick={toggleInputs}
+          aria-expanded={inputsOpen}
+          aria-controls="bill-inputs-panel"
           sx={{
             display: "flex",
             alignItems: "center",
             gap: 1,
+            width: "100%",
             px: 1.25,
             py: 0.75,
+            border: 0,
+            cursor: "pointer",
+            textAlign: "left",
+            font: "inherit",
+            color: "inherit",
             bgcolor: inputsOpen ? "background.paper" : "action.hover",
             borderBottom: inputsOpen ? "1px solid" : "none",
             borderColor: "divider",
+            "&:hover": { bgcolor: "action.hover" },
           }}
         >
           <Typography
@@ -254,24 +299,19 @@ export function Calculator() {
             </Typography>
           )}
           <Box sx={{ flex: inputsOpen ? 1 : 0 }} />
-          <Tooltip title={inputsOpen ? "Collapse inputs" : "Expand inputs"}>
-            <IconButton
-              size="small"
-              onClick={toggleInputs}
-              aria-expanded={inputsOpen}
-              aria-controls="bill-inputs-panel"
-              aria-label={inputsOpen ? "Collapse inputs" : "Expand inputs"}
-            >
-              <FontAwesomeIcon
-                icon={inputsOpen ? faCompress : faExpand}
-                style={{ fontSize: 14 }}
-              />
-            </IconButton>
-          </Tooltip>
+          <FontAwesomeIcon
+            icon={inputsOpen ? faCompress : faExpand}
+            style={{ fontSize: 14, color: "#5a656c" }}
+            aria-hidden
+          />
         </Box>
 
         <Collapse in={inputsOpen} timeout="auto">
-          <Box id="bill-inputs-panel" sx={{ px: 1.25, py: 1.1 }}>
+          <Box
+            id="bill-inputs-panel"
+            sx={{ px: 1.25, py: 1.1 }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <Box
               sx={{
                 display: "grid",
@@ -307,7 +347,7 @@ export function Calculator() {
               <Box>
                 <FieldLabel
                   label="Meter size"
-                  tip='5/8" and 3/4" share the same fixed water service rate. Larger meters cost more.'
+                  tip='5/8" and 3/4" share the same fixed water service rate.'
                 />
                 <FormControl fullWidth>
                   <Select
@@ -329,7 +369,7 @@ export function Calculator() {
               <Box>
                 <FieldLabel
                   label="Water use (ccf)"
-                  tip="Bimonthly usage in hundreds of cubic feet (ccf)."
+                  tip="Bimonthly usage in hundreds of cubic feet. Also used as a proxy to suggest capital band and drought tier when spring / yearly averages are unknown."
                 />
                 <TextField
                   fullWidth
@@ -349,7 +389,7 @@ export function Calculator() {
               <Box>
                 <FieldLabel
                   label="Winter sewer avg"
-                  tip="Mid-October → mid-February average. Half-units allowed. Pre-filled 18.5 from sample bills — edit if yours differs."
+                  tip="Mid-October → mid-February average. Half-units allowed. Pre-filled 18.5 from sample bills."
                 />
                 <TextField
                   fullWidth
@@ -375,6 +415,7 @@ export function Calculator() {
                 gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
               }}
             >
+              {/* CAPITAL */}
               <Box
                 sx={{
                   border: "1px solid",
@@ -384,33 +425,56 @@ export function Calculator() {
                   py: 0.75,
                 }}
               >
-                <FieldLabel
-                  label="Capital project charge"
-                  tip={
-                    <span>
-                      From the City{" "}
-                      <Link
-                        href="https://www.brisbaneca.gov/513/Capital-Projects-Charge"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        color="inherit"
-                      >
-                        Capital Projects Charge
-                      </Link>{" "}
-                      page: graduated by springtime usage (mid-Feb – mid-Jun),
-                      per 2-month cycle (2022 rates). Multi-period banding is
-                      not fully specified — use your bill or a band preset.
-                    </span>
-                  }
-                />
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  sx={{ mb: 0.35, alignItems: "center", flexWrap: "wrap" }}
+                >
+                  <FieldLabel
+                    label="Capital project charge"
+                    tip={
+                      <span>
+                        Auto from entered water use as a proxy for the City{" "}
+                        <Link
+                          href="https://www.brisbaneca.gov/513/Capital-Projects-Charge"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          color="inherit"
+                        >
+                          Capital Projects Charge
+                        </Link>{" "}
+                        spring-usage bands (mid-Feb – mid-Jun). Override if your
+                        bill differs.
+                      </span>
+                    }
+                  />
+                  {(capitalOverride || capitalManual) && (
+                    <Chip
+                      size="small"
+                      label="Custom"
+                      color="warning"
+                      variant="outlined"
+                      sx={{ height: 20, fontSize: "0.7rem" }}
+                    />
+                  )}
+                </Stack>
                 <RadioGroup
                   row
-                  value={capitalMode}
-                  onChange={(_, v) => setCapitalMode(v as CapitalMode)}
+                  value={capitalManual ? "manual" : "band"}
+                  onChange={(_, v) => {
+                    if (v === "manual") {
+                      setCapitalManual(true);
+                      setCapitalOverride(true);
+                      setCapitalManualAmount(String(capitalAmount));
+                    } else {
+                      setCapitalManual(false);
+                      setCapitalOverride(true);
+                    }
+                  }}
                   sx={{ mb: 0.5, gap: 0.5 }}
                 >
                   <FormControlLabel
-                    value="preset"
+                    value="band"
                     control={<Radio size="small" />}
                     label={<Typography variant="caption">Band</Typography>}
                     sx={{ mr: 1 }}
@@ -418,29 +482,18 @@ export function Calculator() {
                   <FormControlLabel
                     value="manual"
                     control={<Radio size="small" />}
-                    label={<Typography variant="caption">Manual</Typography>}
+                    label={<Typography variant="caption">Manual $</Typography>}
                   />
                 </RadioGroup>
-                {capitalMode === "preset" ? (
-                  <FormControl fullWidth>
-                    <Select
-                      value={capitalPresetId}
-                      onChange={(e) => setCapitalPresetId(e.target.value)}
-                      inputProps={{ "aria-label": "Capital band preset" }}
-                    >
-                      {CAPITAL_PRESETS.map((p) => (
-                        <MenuItem key={p.id} value={p.id}>
-                          {p.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                ) : (
+                {capitalManual ? (
                   <TextField
                     fullWidth
                     type="number"
-                    value={capitalManual}
-                    onChange={(e) => setCapitalManual(e.target.value)}
+                    value={capitalManualAmount}
+                    onChange={(e) => {
+                      setCapitalManualAmount(e.target.value);
+                      setCapitalOverride(true);
+                    }}
                     slotProps={{
                       input: {
                         startAdornment: (
@@ -454,9 +507,44 @@ export function Calculator() {
                       },
                     }}
                   />
+                ) : (
+                  <FormControl fullWidth>
+                    <Select
+                      value={capitalPresetId}
+                      onChange={(e) => {
+                        setCapitalPresetId(e.target.value);
+                        setCapitalOverride(true);
+                        setCapitalManual(false);
+                      }}
+                      inputProps={{ "aria-label": "Capital band" }}
+                    >
+                      {CAPITAL_PRESETS.map((p) => (
+                        <MenuItem key={p.id} value={p.id}>
+                          {p.label}
+                          {p.id === capitalSuggested.id ? " · suggested" : ""}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+                {(capitalOverride || capitalManual) && (
+                  <Button
+                    size="small"
+                    startIcon={
+                      <FontAwesomeIcon
+                        icon={faRotateLeft}
+                        style={{ fontSize: 11 }}
+                      />
+                    }
+                    onClick={resetCapitalSuggested}
+                    sx={{ mt: 0.5, px: 0.5, minWidth: 0 }}
+                  >
+                    Use suggested ({capitalSuggested.label})
+                  </Button>
                 )}
               </Box>
 
+              {/* DROUGHT */}
               <Box
                 sx={{
                   border: "1px solid",
@@ -466,36 +554,58 @@ export function Calculator() {
                   py: 0.75,
                 }}
               >
-                <FieldLabel
-                  label="Drought contingency"
-                  tip={
-                    <span>
-                      From the City{" "}
-                      <Link
-                        href="https://www.brisbaneca.gov/512/Drought-Contingency-Charge"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        color="inherit"
-                      >
-                        Drought Contingency Charge
-                      </Link>{" "}
-                      page: $2.32 / $6.99 per billing when yearly average is
-                      below / above the median (currently 12 units). Exact
-                      average window is unpublished.
-                    </span>
-                  }
-                />
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  sx={{ mb: 0.35, alignItems: "center", flexWrap: "wrap" }}
+                >
+                  <FieldLabel
+                    label="Drought contingency"
+                    tip={
+                      <span>
+                        Auto below/above median (12 units) from water-use proxy
+                        per City{" "}
+                        <Link
+                          href="https://www.brisbaneca.gov/512/Drought-Contingency-Charge"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          color="inherit"
+                        >
+                          Drought Contingency Charge
+                        </Link>
+                        . Override if your bill differs.
+                      </span>
+                    }
+                  />
+                  {droughtOverride && (
+                    <Chip
+                      size="small"
+                      label="Custom"
+                      color="warning"
+                      variant="outlined"
+                      sx={{ height: 20, fontSize: "0.7rem" }}
+                    />
+                  )}
+                </Stack>
                 <RadioGroup
                   row
                   value={droughtMode}
-                  onChange={(_, v) => setDroughtMode(v as DroughtMode)}
+                  onChange={(_, v) => {
+                    setDroughtMode(v as DroughtMode);
+                    setDroughtOverride(true);
+                  }}
                   sx={{ mb: droughtMode === "manual" ? 0.5 : 0, gap: 0.25 }}
                 >
                   <FormControlLabel
                     value="below"
                     control={<Radio size="small" />}
                     label={
-                      <Typography variant="caption">Below $2.32</Typography>
+                      <Typography variant="caption">
+                        Below $2.32
+                        {droughtSuggested.id === "below" && !droughtOverride
+                          ? " · auto"
+                          : ""}
+                      </Typography>
                     }
                     sx={{ mr: 0.75 }}
                   />
@@ -503,7 +613,12 @@ export function Calculator() {
                     value="above"
                     control={<Radio size="small" />}
                     label={
-                      <Typography variant="caption">Above $6.99</Typography>
+                      <Typography variant="caption">
+                        Above $6.99
+                        {droughtSuggested.id === "above" && !droughtOverride
+                          ? " · auto"
+                          : ""}
+                      </Typography>
                     }
                     sx={{ mr: 0.75 }}
                   />
@@ -518,7 +633,10 @@ export function Calculator() {
                     fullWidth
                     type="number"
                     value={droughtManual}
-                    onChange={(e) => setDroughtManual(e.target.value)}
+                    onChange={(e) => {
+                      setDroughtManual(e.target.value);
+                      setDroughtOverride(true);
+                    }}
                     slotProps={{
                       input: {
                         startAdornment: (
@@ -533,13 +651,28 @@ export function Calculator() {
                     }}
                   />
                 )}
+                {droughtOverride && (
+                  <Button
+                    size="small"
+                    startIcon={
+                      <FontAwesomeIcon
+                        icon={faRotateLeft}
+                        style={{ fontSize: 11 }}
+                      />
+                    }
+                    onClick={resetDroughtSuggested}
+                    sx={{ mt: 0.5, px: 0.5, minWidth: 0 }}
+                  >
+                    Use suggested ({droughtSuggested.label})
+                  </Button>
+                )}
               </Box>
             </Box>
           </Box>
         </Collapse>
       </Paper>
 
-      {/* ESTIMATED BILL */}
+      {/* COMBINED RESULTS CARD */}
       <Paper
         elevation={0}
         sx={{
@@ -551,215 +684,297 @@ export function Calculator() {
       >
         <Box
           sx={{
-            px: { xs: 1.5, sm: 2 },
-            py: 1.75,
-            bgcolor: "primary.main",
-            color: "primary.contrastText",
-            backgroundImage:
-              "linear-gradient(135deg, #0a5c63 0%, #0d6e76 55%, #155e63 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+            px: 1.25,
+            py: 0.85,
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            flexWrap: "wrap",
           }}
         >
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={0.5}
-            sx={{
-              alignItems: { xs: "flex-start", sm: "baseline" },
-              justifyContent: "space-between",
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+            Estimated bill
+          </Typography>
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            value={resultView}
+            onChange={(_, v: ResultView | null) => {
+              if (v) setResultView(v);
             }}
+            aria-label="Bill view"
           >
-            <Box>
-              <Typography
-                variant="overline"
-                sx={{ opacity: 0.85, letterSpacing: "0.1em" }}
-              >
-                Amount due
-              </Typography>
-              <Typography
-                component="button"
-                type="button"
-                onClick={() => toggleLine("total")}
-                aria-expanded={!!expanded.total}
-                sx={{
-                  display: "block",
-                  m: 0,
-                  p: 0,
-                  border: 0,
-                  background: "none",
-                  color: "inherit",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  fontFamily: "var(--font-ibm-plex-mono), monospace",
-                  fontWeight: 600,
-                  fontSize: { xs: "2.35rem", sm: "2.85rem" },
-                  lineHeight: 1.05,
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                {formatMoney(totalLine.amount)}
-              </Typography>
-            </Box>
-            <Tooltip title="Click the total or any line for the formula">
-              <Typography
-                variant="caption"
-                sx={{ opacity: 0.85, maxWidth: 220 }}
-              >
-                Prop 218 maxima · over-20 uses published table
-                <FontAwesomeIcon
-                  icon={faCircleInfo}
-                  style={{ marginLeft: 6, fontSize: 12 }}
-                />
-              </Typography>
-            </Tooltip>
-          </Stack>
-          <Collapse in={!!expanded.total}>
-            <Typography
-              variant="caption"
+            <ToggleButton value="bill">{rateYear} detail</ToggleButton>
+            <ToggleButton value="years">All years</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+
+        {resultView === "bill" ? (
+          <>
+            <Box
               sx={{
-                display: "block",
-                mt: 1,
-                opacity: 0.9,
-                fontFamily: "var(--font-ibm-plex-mono), monospace",
+                px: { xs: 1.5, sm: 2 },
+                py: 1.75,
+                color: "primary.contrastText",
+                backgroundImage:
+                  "linear-gradient(135deg, #0a5c63 0%, #0d6e76 55%, #155e63 100%)",
               }}
             >
-              {totalLine.formula}
-            </Typography>
-          </Collapse>
-        </Box>
-
-        <Box sx={{ px: 0.5, py: 0.5 }}>
-          {lineItems.map((line) => {
-            const isOpen = !!expanded[line.id];
-            return (
-              <Box key={line.id}>
-                <Box
-                  component="button"
-                  type="button"
-                  onClick={() => toggleLine(line.id)}
-                  aria-expanded={isOpen}
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "auto 1fr auto",
-                    gap: 1,
-                    alignItems: "center",
-                    width: "100%",
-                    border: 0,
-                    borderRadius: 1,
-                    bgcolor: "transparent",
-                    px: 1.25,
-                    py: 0.85,
-                    cursor: "pointer",
-                    textAlign: "left",
-                    font: "inherit",
-                    color: "inherit",
-                    "&:hover": { bgcolor: "action.hover" },
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={isOpen ? faChevronDown : faChevronRight}
-                    style={{ fontSize: 11, color: "#5a656c", width: 12 }}
-                  />
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={0.5}
+                sx={{
+                  alignItems: { xs: "flex-start", sm: "baseline" },
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box>
                   <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 600,
-                      letterSpacing: "0.02em",
-                      fontSize: "0.84rem",
-                      color: "text.secondary",
-                    }}
+                    variant="overline"
+                    sx={{ opacity: 0.85, letterSpacing: "0.1em" }}
                   >
-                    {line.label}
+                    Amount due · {rateYear}
                   </Typography>
                   <Typography
-                    className="money"
-                    sx={{ fontWeight: 600, fontSize: "0.98rem" }}
-                  >
-                    {formatMoney(line.amount)}
-                  </Typography>
-                </Box>
-                <Collapse in={isOpen}>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    className="money"
+                    component="button"
+                    type="button"
+                    onClick={() => toggleLine("total")}
+                    aria-expanded={!!expanded.total}
                     sx={{
                       display: "block",
-                      px: 4,
-                      pb: 1,
-                      lineHeight: 1.45,
+                      m: 0,
+                      p: 0,
+                      border: 0,
+                      background: "none",
+                      color: "inherit",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      fontFamily: "var(--font-ibm-plex-mono), monospace",
+                      fontWeight: 600,
+                      fontSize: { xs: "2.35rem", sm: "2.85rem" },
+                      lineHeight: 1.05,
+                      letterSpacing: "-0.02em",
                     }}
                   >
-                    {line.formula}
+                    {formatMoney(totalLine.amount)}
                   </Typography>
-                </Collapse>
-              </Box>
-            );
-          })}
-        </Box>
-      </Paper>
-
-      {/* YEAR COMPARISON */}
-      <Paper
-        elevation={0}
-        sx={{
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 1.5,
-          p: 1.5,
-        }}
-      >
-        <Stack
-          direction="row"
-          spacing={0.5}
-          sx={{ mb: 0.75, alignItems: "center" }}
-        >
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-            Same inputs under approved years
-          </Typography>
-          <InfoTip title="Capital and drought held constant (manual/presets). Water and sewer use each year’s approved maxima through 2027." />
-        </Stack>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Year</TableCell>
-                <TableCell align="right">Water use</TableCell>
-                <TableCell align="right">Water svc</TableCell>
-                <TableCell align="right">Sewer</TableCell>
-                <TableCell align="right">Capital</TableCell>
-                <TableCell align="right">Drought</TableCell>
-                <TableCell align="right">Total</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {projections.map(({ rateYear: y, result: r }) => (
-                <TableRow
-                  key={y}
-                  selected={y === rateYear}
+                </Box>
+                <Tooltip title="Click the total or any line for the formula. Prop 218 maxima; over-20 uses published table.">
+                  <Typography
+                    variant="caption"
+                    sx={{ opacity: 0.85, maxWidth: 240 }}
+                  >
+                    Prop 218 maxima · over-20 published table
+                    <FontAwesomeIcon
+                      icon={faCircleInfo}
+                      style={{ marginLeft: 6, fontSize: 12 }}
+                    />
+                  </Typography>
+                </Tooltip>
+              </Stack>
+              <Collapse in={!!expanded.total}>
+                <Typography
+                  variant="caption"
                   sx={{
-                    "& td, & th": { fontFamily: "var(--font-ibm-plex-mono), monospace", fontSize: "0.82rem" },
-                    "&.Mui-selected": { bgcolor: "rgba(10, 92, 99, 0.08)" },
+                    display: "block",
+                    mt: 1,
+                    opacity: 0.9,
+                    fontFamily: "var(--font-ibm-plex-mono), monospace",
                   }}
                 >
-                  <TableCell component="th" scope="row" sx={{ fontWeight: 600, fontFamily: "var(--font-figtree), sans-serif !important" }}>
-                    {y}
-                    {y === 2027 ? " *" : ""}
-                  </TableCell>
-                  <TableCell align="right">{formatMoney(r.waterUse)}</TableCell>
-                  <TableCell align="right">{formatMoney(r.waterService)}</TableCell>
-                  <TableCell align="right">{formatMoney(r.sewer)}</TableCell>
-                  <TableCell align="right">{formatMoney(r.capital)}</TableCell>
-                  <TableCell align="right">{formatMoney(r.drought)}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700 }}>
-                    {formatMoney(r.total)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: "block" }}>
-          * 2027 is the last City-approved maximum schedule.
-        </Typography>
+                  {totalLine.formula}
+                </Typography>
+              </Collapse>
+            </Box>
+
+            <Box sx={{ px: 0.5, py: 0.5 }}>
+              {lineItems.map((line) => {
+                const isOpen = !!expanded[line.id];
+                return (
+                  <Box key={line.id}>
+                    <Box
+                      component="button"
+                      type="button"
+                      onClick={() => toggleLine(line.id)}
+                      aria-expanded={isOpen}
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "auto 1fr auto",
+                        gap: 1,
+                        alignItems: "center",
+                        width: "100%",
+                        border: 0,
+                        borderRadius: 1,
+                        bgcolor: "transparent",
+                        px: 1.25,
+                        py: 0.85,
+                        cursor: "pointer",
+                        textAlign: "left",
+                        font: "inherit",
+                        color: "inherit",
+                        "&:hover": { bgcolor: "action.hover" },
+                      }}
+                    >
+                      <FontAwesomeIcon
+                        icon={isOpen ? faChevronDown : faChevronRight}
+                        style={{ fontSize: 11, color: "#5a656c", width: 12 }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                          letterSpacing: "0.02em",
+                          fontSize: "0.84rem",
+                          color: "text.secondary",
+                        }}
+                      >
+                        {line.label}
+                      </Typography>
+                      <Typography
+                        className="money"
+                        sx={{ fontWeight: 600, fontSize: "0.98rem" }}
+                      >
+                        {formatMoney(line.amount)}
+                      </Typography>
+                    </Box>
+                    <Collapse in={isOpen}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        className="money"
+                        sx={{ display: "block", px: 4, pb: 1, lineHeight: 1.45 }}
+                      >
+                        {line.formula}
+                      </Typography>
+                    </Collapse>
+                  </Box>
+                );
+              })}
+            </Box>
+          </>
+        ) : (
+          <Box sx={{ p: 1.5 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Same inputs under approved maxima through 2027. Capital & drought
+              held at current selection.
+            </Typography>
+            <Box sx={{ width: "100%", height: 260 }}>
+              <LineChart
+                xAxis={[
+                  {
+                    data: chartYears,
+                    scaleType: "point",
+                    valueFormatter: (v) => String(v),
+                    label: "Rate year",
+                  },
+                ]}
+                series={[
+                  {
+                    data: chartTotal,
+                    label: "Total",
+                    color: "#0a5c63",
+                    curve: "linear",
+                    showMark: true,
+                    valueFormatter: (v) =>
+                      v == null ? "" : formatMoney(v),
+                  },
+                  {
+                    data: chartWater,
+                    label: "Water (use+svc)",
+                    color: "#2f6fed",
+                    curve: "linear",
+                    showMark: true,
+                    valueFormatter: (v) =>
+                      v == null ? "" : formatMoney(v),
+                  },
+                  {
+                    data: chartSewer,
+                    label: "Sewer",
+                    color: "#c45c26",
+                    curve: "linear",
+                    showMark: true,
+                    valueFormatter: (v) =>
+                      v == null ? "" : formatMoney(v),
+                  },
+                ]}
+                margin={{ left: 16, right: 16, top: 20, bottom: 8 }}
+                grid={{ horizontal: true }}
+                slotProps={{
+                  legend: {
+                    direction: "horizontal",
+                    position: { vertical: "top", horizontal: "center" },
+                  },
+                }}
+              />
+            </Box>
+            <TableContainer sx={{ mt: 1 }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Year</TableCell>
+                    <TableCell align="right">Water</TableCell>
+                    <TableCell align="right">Sewer</TableCell>
+                    <TableCell align="right">Cap+Dr</TableCell>
+                    <TableCell align="right">Total</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {projections.map(({ rateYear: y, result: r }) => (
+                    <TableRow
+                      key={y}
+                      selected={y === rateYear}
+                      sx={{
+                        "& td, & th": {
+                          fontFamily:
+                            "var(--font-ibm-plex-mono), monospace",
+                          fontSize: "0.82rem",
+                        },
+                        "&.Mui-selected": {
+                          bgcolor: "rgba(10, 92, 99, 0.08)",
+                        },
+                      }}
+                    >
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        sx={{
+                          fontWeight: 600,
+                          fontFamily:
+                            "var(--font-outfit), Outfit, sans-serif !important",
+                        }}
+                      >
+                        {y}
+                        {y === 2027 ? " *" : ""}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatMoney(r.waterUse + r.waterService)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatMoney(r.sewer)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatMoney(r.capital + r.drought)}
+                      </TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700 }}>
+                        {formatMoney(r.total)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 0.75, display: "block" }}
+            >
+              * 2027 is the last City-approved maximum schedule.
+            </Typography>
+          </Box>
+        )}
       </Paper>
 
       {/* DISCLAIMER */}
@@ -779,11 +994,16 @@ export function Calculator() {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           This is <strong>not</strong> an official City of Brisbane tool. It
           estimates residential water/sewer bills from published rate tables and
-          Prop 218 maximums. It does not include LIRA (25% discount for CARE
-          enrollees), AB 3030 pass-throughs, late fees, or prior balances. Always
-          trust your actual bill.
+          Prop 218 maximums. Capital and drought auto-suggestions use your
+          entered water use as a proxy (City capital bands are spring usage;
+          drought uses a yearly average vs median 12) — override when your bill
+          differs. Does not include LIRA, AB 3030 pass-throughs, late fees, or
+          prior balances. Always trust your actual bill.
         </Typography>
-        <Typography variant="caption" sx={{ fontWeight: 700, display: "block", mb: 0.35 }}>
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 700, display: "block", mb: 0.35 }}
+        >
           Sources
         </Typography>
         <Box

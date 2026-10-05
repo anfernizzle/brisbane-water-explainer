@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { Figtree, IBM_Plex_Mono } from "next/font/google";
+import { Google_Sans, Outfit, IBM_Plex_Mono } from "next/font/google";
 import { AppProviders } from "@/components/AppProviders";
 import "./globals.css";
 
-const figtree = Figtree({
-  variable: "--font-figtree",
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+});
+
+const googleSans = Google_Sans({
+  variable: "--font-google-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
@@ -29,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${figtree.variable} ${ibmPlexMono.variable} h-full`}
+      className={`${outfit.variable} ${googleSans.variable} ${ibmPlexMono.variable} h-full`}
     >
       <body className="min-h-full antialiased">
         <AppProviders>{children}</AppProviders>

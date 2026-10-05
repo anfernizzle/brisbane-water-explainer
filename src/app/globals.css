@@ -8,10 +8,8 @@
   --border: #d0d7db;
   --accent: #0a5c63;
   --accent-soft: #e5f1f2;
-  --total-bg: #e8f2f3;
-  --warn-bg: #fff8e8;
-  --warn-border: #e0c56a;
-  --font-body: var(--font-figtree), Figtree, sans-serif;
+  --font-body: var(--font-google-sans), "Google Sans", sans-serif;
+  --font-display: var(--font-outfit), Outfit, sans-serif;
   --font-code: var(--font-ibm-plex-mono), "IBM Plex Mono", monospace;
 }
 
@@ -57,6 +55,7 @@ a:hover {
 
 .page__eyebrow {
   margin: 0 0 0.2rem;
+  font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -66,7 +65,8 @@ a:hover {
 
 .page__title {
   margin: 0 0 0.35rem;
-  font-size: clamp(1.55rem, 3.2vw, 2.05rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 3.2vw, 2.15rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.15;

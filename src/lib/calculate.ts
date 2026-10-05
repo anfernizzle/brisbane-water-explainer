@@ -13,9 +13,9 @@ export type BillInputs = {
   waterUseCcf: number;
   /** Winter average water use for sewer (mid-Oct → mid-Feb), may be half-units. */
   winterSewerAvgCcf: number;
-  /** Capital project charge — manual / preset only. */
+  /** Capital project charge (auto-suggested from usage band, or user override). */
   capitalAmount: number;
-  /** Drought contingency — manual / preset only. */
+  /** Drought contingency (auto-suggested from usage vs median, or user override). */
   droughtAmount: number;
 };
 
@@ -122,13 +122,13 @@ export function calculateBill(inputs: BillInputs): BillResult {
       id: "capital",
       label: "CAPITAL PROJECT CHRG",
       amount: capital,
-      formula: `Manual / spring-usage band preset = ${formatMoney(capital)} (not auto-derived from usage)`,
+      formula: `Capital charge = ${formatMoney(capital)} (auto from usage band proxy, or user override; City bands are spring usage mid-Feb–mid-Jun)`,
     },
     {
       id: "drought",
       label: "DROUGHT CONTINGENCY",
       amount: drought,
-      formula: `Manual / below–above median preset = ${formatMoney(drought)} (not auto-derived from yearly average)`,
+      formula: `Drought charge = ${formatMoney(drought)} (auto below/above median 12 from usage proxy, or user override)`,
     },
     {
       id: "total",
