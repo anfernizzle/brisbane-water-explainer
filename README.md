@@ -4,6 +4,9 @@ Unofficial residential water/sewer bill calculator for **Brisbane, California**.
 
 This is **not** an official City tool. Rates come from published tables and the Prop 218 notice (Resolution 2023-17 maxima). LIRA is omitted.
 
+**Live:** [https://brisbane-water-explainer.vercel.app](https://brisbane-water-explainer.vercel.app)  
+**Repo:** [https://github.com/anfernizzle/brisbane-water-explainer](https://github.com/anfernizzle/brisbane-water-explainer)
+
 ## Run locally
 
 ```bash
