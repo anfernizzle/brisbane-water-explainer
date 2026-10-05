@@ -911,193 +911,227 @@ export function Calculator() {
               Same inputs under approved maxima through 2027. Capital & drought
               held at current selection.
             </Typography>
-            <Box sx={{ width: "100%", pt: 0.5 }}>
-              <Box sx={{ width: "100%", height: 300 }}>
-                <LineChart
-                  dataset={chartDataset}
-                  xAxis={[
-                    {
-                      dataKey: "year",
-                      scaleType: "point",
-                      tickLabelInterval: () => true,
-                      tickLabelStyle: {
-                        fontSize: 13,
-                        fontWeight: 700,
-                        fill: "#182024",
-                      },
-                    },
-                  ]}
-                  yAxis={[
-                    {
-                      width: 72,
-                      tickLabelStyle: { fontSize: 11, fill: "#5a656c" },
-                      valueFormatter: (value: number | null) => {
-                        if (value == null || Number.isNaN(Number(value))) {
-                          return "";
-                        }
-                        return `$${Math.round(Number(value)).toLocaleString("en-US")}`;
-                      },
-                    },
-                  ]}
-                  series={[
-                    {
-                      dataKey: "total",
-                      label: "Total",
-                      color: "#0a5c63",
-                      curve: "linear",
-                      showMark: true,
-                      valueFormatter: (v) =>
-                        v == null ? "" : formatMoney(Number(v)),
-                    },
-                    {
-                      dataKey: "water",
-                      label: "Water (use+svc)",
-                      color: "#2f6fed",
-                      curve: "linear",
-                      showMark: true,
-                      valueFormatter: (v) =>
-                        v == null ? "" : formatMoney(Number(v)),
-                    },
-                    {
-                      dataKey: "sewer",
-                      label: "Sewer",
-                      color: "#c45c26",
-                      curve: "linear",
-                      showMark: true,
-                      valueFormatter: (v) =>
-                        v == null ? "" : formatMoney(Number(v)),
-                    },
-                  ]}
-                  margin={{ left: 8, right: 12, top: 36, bottom: 40 }}
-                  grid={{ horizontal: true }}
-                  slotProps={{
-                    legend: {
-                      direction: "horizontal",
-                      position: { vertical: "top", horizontal: "center" },
-                    },
-                  }}
-                />
-              </Box>
-              {/* Guaranteed visible year labels under the plot */}
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "72px repeat(5, 1fr) 12px",
-                  alignItems: "center",
-                  mt: -0.25,
-                  mb: 0.75,
-                }}
-              >
-                <Box />
-                {chartYearLabels.map((y) => (
-                  <Typography
-                    key={y}
-                    component="span"
+
+            {(() => {
+              // Shared geometry: left gutter (Y-axis + row labels) + 5 equal year columns.
+              const LABEL_COL_PX = 120;
+              const gridColumns = `${LABEL_COL_PX}px repeat(5, minmax(0, 1fr))`;
+
+              return (
+                <Box>
+                  {/* Chart plot shares the same left gutter / column widths as the table */}
+                  <Box
                     sx={{
-                      textAlign: "center",
-                      fontWeight: 700,
-                      fontSize: "0.85rem",
-                      color:
-                        Number(y) === rateYear
-                          ? "primary.main"
-                          : "text.primary",
-                      fontFamily:
-                        "var(--font-outfit), Outfit, sans-serif",
+                      display: "grid",
+                      gridTemplateColumns: gridColumns,
+                      width: "100%",
                     }}
                   >
-                    {y}
-                  </Typography>
-                ))}
-                <Box />
-              </Box>
-            </Box>
-            <TableContainer sx={{ mt: 0.5 }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell
+                    <Box
                       sx={{
-                        fontWeight: 700,
-                        color: "primary.dark",
-                        fontFamily:
-                          "var(--font-outfit), Outfit, sans-serif",
+                        gridColumn: "1 / -1",
+                        height: 260,
+                        width: "100%",
                       }}
                     >
-                      Line item
-                    </TableCell>
-                    {chartYearLabels.map((y) => (
-                      <TableCell
-                        key={y}
-                        align="right"
-                        sx={{
-                          fontWeight: 700,
-                          color:
-                            Number(y) === rateYear
-                              ? "primary.main"
-                              : "text.primary",
-                          bgcolor:
-                            Number(y) === rateYear
-                              ? "rgba(10, 92, 99, 0.08)"
-                              : undefined,
+                      <LineChart
+                        dataset={chartDataset}
+                        xAxis={[
+                          {
+                            dataKey: "year",
+                            scaleType: "band",
+                            // Center marks in each year column (matches table cells).
+                            categoryGapRatio: 0,
+                            tickPlacement: "middle",
+                            // Hide X tick labels — years live only in the table header.
+                            tickLabelInterval: () => false,
+                            disableTicks: true,
+                          },
+                        ]}
+                        yAxis={[
+                          {
+                            width: 56,
+                            tickLabelStyle: {
+                              fontSize: 11,
+                              fill: "#5a656c",
+                            },
+                            valueFormatter: (value: number | null) => {
+                              if (
+                                value == null ||
+                                Number.isNaN(Number(value))
+                              ) {
+                                return "";
+                              }
+                              return `$${Math.round(Number(value)).toLocaleString("en-US")}`;
+                            },
+                          },
+                        ]}
+                        series={[
+                          {
+                            dataKey: "total",
+                            label: "Total",
+                            color: "#0a5c63",
+                            curve: "linear",
+                            showMark: true,
+                            valueFormatter: (v) =>
+                              v == null ? "" : formatMoney(Number(v)),
+                          },
+                          {
+                            dataKey: "water",
+                            label: "Water (use+svc)",
+                            color: "#2f6fed",
+                            curve: "linear",
+                            showMark: true,
+                            valueFormatter: (v) =>
+                              v == null ? "" : formatMoney(Number(v)),
+                          },
+                          {
+                            dataKey: "sewer",
+                            label: "Sewer",
+                            color: "#c45c26",
+                            curve: "linear",
+                            showMark: true,
+                            valueFormatter: (v) =>
+                              v == null ? "" : formatMoney(Number(v)),
+                          },
+                        ]}
+                        // Left margin = label column so the plot spans the 5 year columns.
+                        margin={{
+                          left: LABEL_COL_PX,
+                          right: 0,
+                          top: 36,
+                          bottom: 8,
                         }}
-                      >
-                        {y}
-                        {y === "2027" ? " *" : ""}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {tableRows.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell
-                        component="th"
-                        scope="row"
-                        sx={{
-                          fontWeight: row.emphasize ? 700 : 600,
-                          fontFamily:
-                            "var(--font-outfit), Outfit, sans-serif",
-                          color: row.emphasize
-                            ? "text.primary"
-                            : "text.secondary",
+                        grid={{ horizontal: true }}
+                        slotProps={{
+                          legend: {
+                            direction: "horizontal",
+                            position: {
+                              vertical: "top",
+                              horizontal: "center",
+                            },
+                          },
                         }}
-                      >
-                        {row.label}
-                      </TableCell>
-                      {row.values.map((value, idx) => {
-                        const y = Number(chartYearLabels[idx]);
-                        return (
+                        sx={{
+                          // Belt-and-suspenders: never paint X tick labels.
+                          "& .MuiChartsAxis-directionX .MuiChartsAxis-tickLabel":
+                            {
+                              display: "none",
+                            },
+                          "& .MuiChartsAxis-directionX .MuiChartsAxis-line": {
+                            stroke: "#d0d7db",
+                          },
+                        }}
+                      />
+                    </Box>
+                  </Box>
+
+                  {/* Single year-label row = table header; columns match chart plot */}
+                  <TableContainer sx={{ mt: 0.25 }}>
+                    <Table
+                      size="small"
+                      sx={{
+                        tableLayout: "fixed",
+                        width: "100%",
+                      }}
+                    >
+                      <colgroup>
+                        <col style={{ width: LABEL_COL_PX }} />
+                        {chartYearLabels.map((y) => (
+                          <col key={y} />
+                        ))}
+                      </colgroup>
+                      <TableHead>
+                        <TableRow>
                           <TableCell
-                            key={`${row.id}-${y}`}
-                            align="right"
                             sx={{
+                              fontWeight: 700,
+                              color: "primary.dark",
                               fontFamily:
-                                "var(--font-ibm-plex-mono), monospace",
-                              fontSize: "0.82rem",
-                              fontWeight: row.emphasize ? 700 : 500,
-                              bgcolor:
-                                y === rateYear
-                                  ? "rgba(10, 92, 99, 0.08)"
-                                  : undefined,
+                                "var(--font-outfit), Outfit, sans-serif",
+                              width: LABEL_COL_PX,
                             }}
                           >
-                            {formatMoney(value)}
+                            Line item
                           </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ mt: 0.75, display: "block" }}
-            >
-              * 2027 is the last City-approved maximum schedule. Columns align
-              with the chart years above.
-            </Typography>
+                          {chartYearLabels.map((y) => (
+                            <TableCell
+                              key={y}
+                              align="center"
+                              sx={{
+                                fontWeight: 700,
+                                color:
+                                  Number(y) === rateYear
+                                    ? "primary.main"
+                                    : "text.primary",
+                                bgcolor:
+                                  Number(y) === rateYear
+                                    ? "rgba(10, 92, 99, 0.08)"
+                                    : undefined,
+                              }}
+                            >
+                              {y}
+                              {y === "2027" ? " *" : ""}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {tableRows.map((row) => (
+                          <TableRow key={row.id}>
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              sx={{
+                                fontWeight: row.emphasize ? 700 : 600,
+                                fontFamily:
+                                  "var(--font-outfit), Outfit, sans-serif",
+                                color: row.emphasize
+                                  ? "text.primary"
+                                  : "text.secondary",
+                                width: LABEL_COL_PX,
+                              }}
+                            >
+                              {row.label}
+                            </TableCell>
+                            {row.values.map((value, idx) => {
+                              const y = Number(chartYearLabels[idx]);
+                              return (
+                                <TableCell
+                                  key={`${row.id}-${y}`}
+                                  align="center"
+                                  sx={{
+                                    fontFamily:
+                                      "var(--font-ibm-plex-mono), monospace",
+                                    fontSize: "0.82rem",
+                                    fontWeight: row.emphasize ? 700 : 500,
+                                    bgcolor:
+                                      y === rateYear
+                                        ? "rgba(10, 92, 99, 0.08)"
+                                        : undefined,
+                                  }}
+                                >
+                                  {formatMoney(value)}
+                                </TableCell>
+                              );
+                            })}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 0.75, display: "block" }}
+                  >
+                    * 2027 is the last City-approved maximum schedule. Year
+                    labels appear once in the table header; chart points are
+                    centered above each year column.
+                  </Typography>
+                </Box>
+              );
+            })()}
           </Box>
         )}
       </Paper>
