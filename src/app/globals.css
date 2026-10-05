@@ -16,7 +16,22 @@
   --line-strong: rgba(17, 17, 17, 0.22);
   --shadow-soft: 0 6px 20px rgba(17, 17, 17, 0.07);
 
-  --bs-body-bg: var(--paper);
+  /* Glassmorphic surfaces — opaque enough for WCAG AA ink on frost */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-raised: rgba(255, 255, 255, 0.82);
+  --glass-bg-header: rgba(255, 255, 255, 0.55);
+  --glass-bg-deep: rgba(250, 250, 250, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-border-ink: rgba(17, 17, 17, 0.12);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --glass-shadow:
+    var(--glass-highlight),
+    0 4px 6px rgba(17, 17, 17, 0.04),
+    0 12px 32px rgba(17, 17, 17, 0.14);
+  --glass-blur: blur(18px) saturate(1.25);
+  --glass-amount: rgba(17, 17, 17, 0.82);
+
+  --bs-body-bg: transparent;
   --bs-body-color: var(--ink);
   --bs-primary: var(--accent-ink);
   --bs-primary-rgb: 194, 51, 111;
@@ -42,14 +57,31 @@
   box-sizing: border-box;
 }
 
+html {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
-  background:
-    radial-gradient(900px 420px at 100% 0%, rgba(238, 89, 145, 0.06) 0%, transparent 50%),
-    var(--paper);
+  min-height: 100%;
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.5;
+  /* Fallback tint close to the water photo while image loads */
+  background-color: #7a9eb0;
+  background-image:
+    linear-gradient(
+      165deg,
+      rgba(250, 250, 250, 0.42) 0%,
+      rgba(250, 250, 250, 0.12) 38%,
+      rgba(250, 250, 250, 0.28) 72%,
+      rgba(250, 250, 250, 0.5) 100%
+    ),
+    url("/water-background.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 a {
@@ -68,6 +100,13 @@ a:hover {
 
 .page__header {
   margin-bottom: 0.9rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
 .page__eyebrow {
@@ -77,7 +116,7 @@ a:hover {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--ink-soft);
 }
 
 .page__title {
@@ -102,10 +141,10 @@ a:hover {
   font-variant-numeric: tabular-nums;
 }
 
-/* Bootstrap soft filled controls */
+/* Bootstrap soft filled controls — opaque enough on glass */
 .form-control,
 .form-select {
-  background-color: var(--paper-deep);
+  background-color: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--line-strong);
   border-radius: 8px;
   color: var(--ink);
@@ -114,9 +153,10 @@ a:hover {
 
 .form-control:focus,
 .form-select:focus {
-  background-color: #e8e8e8;
+  background-color: #ffffff;
   border-color: var(--accent);
   box-shadow: 0 0 0 0.2rem rgba(238, 89, 145, 0.2);
+  color: var(--ink);
 }
 
 .form-label {
@@ -128,21 +168,54 @@ a:hover {
 
 .form-check-label {
   font-size: 0.8rem;
+  color: var(--ink);
 }
 
+.form-text,
+.text-secondary {
+  color: var(--ink-soft) !important;
+}
+
+/* Stacked dimensional frosted glass cards */
 .card {
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  box-shadow: var(--shadow-soft);
-  background: var(--paper-raised);
+  --bs-card-bg: var(--glass-bg);
+  --bs-card-border-color: var(--glass-border-ink);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+}
+
+.card + .card {
+  /* Slight depth cue between stacked panels */
+  box-shadow:
+    var(--glass-highlight),
+    0 6px 10px rgba(17, 17, 17, 0.05),
+    0 16px 40px rgba(17, 17, 17, 0.16);
 }
 
 .card-header {
-  background: var(--paper-deep);
-  border-bottom: 1px solid var(--line);
+  background: var(--glass-bg-header);
+  border-bottom: 1px solid var(--glass-border-ink);
   font-family: var(--font-display);
   font-weight: 700;
   color: var(--accent-ink);
+}
+
+button.card-header {
+  background: var(--glass-bg-header);
+  color: var(--accent-ink);
+}
+
+button.card-header:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.card-body {
+  background: transparent;
 }
 
 .btn-primary {
@@ -161,13 +234,20 @@ a:hover {
 .btn-outline-primary {
   --bs-btn-color: var(--accent-ink);
   --bs-btn-border-color: var(--line-strong);
-  --bs-btn-hover-bg: rgba(238, 89, 145, 0.12);
+  --bs-btn-bg: rgba(255, 255, 255, 0.55);
+  --bs-btn-hover-bg: rgba(238, 89, 145, 0.18);
   --bs-btn-hover-border-color: var(--accent);
   --bs-btn-hover-color: var(--ink);
   --bs-btn-active-bg: var(--accent);
   --bs-btn-active-border-color: var(--accent);
   --bs-btn-active-color: var(--ink);
   font-weight: 600;
+}
+
+.btn-check:checked + .btn-outline-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
 }
 
 .btn-link {
@@ -184,15 +264,20 @@ a:hover {
 .badge-custom {
   font-size: 0.68rem;
   font-weight: 600;
-  background: rgba(238, 89, 145, 0.14);
+  background: rgba(238, 89, 145, 0.22);
   color: var(--accent-ink);
-  border: 1px solid rgba(194, 51, 111, 0.25);
+  border: 1px solid rgba(194, 51, 111, 0.35);
 }
 
+/* High-contrast amount panel on frosted stack */
 .amount-due {
-  background: var(--depth);
+  background: var(--glass-amount);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
   color: #fff;
   padding: 1.1rem 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .amount-due__label {
@@ -200,7 +285,8 @@ a:hover {
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  opacity: 0.8;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .amount-due__total {
@@ -211,7 +297,7 @@ a:hover {
   letter-spacing: -0.02em;
   background: none;
   border: 0;
-  color: inherit;
+  color: #ffffff;
   padding: 0;
   cursor: pointer;
   text-align: left;
@@ -219,7 +305,8 @@ a:hover {
 
 .amount-due__hint {
   font-size: 0.78rem;
-  opacity: 0.8;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .bill-line {
@@ -238,7 +325,7 @@ a:hover {
 }
 
 .bill-line:hover {
-  background: var(--paper-deep);
+  background: rgba(255, 255, 255, 0.45);
 }
 
 .bill-line__label {
@@ -252,6 +339,7 @@ a:hover {
   font-family: var(--font-code);
   font-weight: 600;
   font-size: 0.98rem;
+  color: var(--ink);
 }
 
 .bill-line__formula {
@@ -262,15 +350,35 @@ a:hover {
   margin: 0;
 }
 
+.chart-glass {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--glass-border-ink);
+  padding: 0.35rem 0.25rem 0.15rem;
+}
+
 .table-years {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--ink);
+  --bs-table-border-color: rgba(17, 17, 17, 0.12);
   table-layout: fixed;
   width: 100%;
   font-size: 0.85rem;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .table-years th {
   font-family: var(--font-display);
   font-weight: 700;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.table-years td {
+  color: var(--ink);
 }
 
 .table-years .year-col {
@@ -279,7 +387,7 @@ a:hover {
 
 .table-years .year-current {
   color: var(--accent-ink);
-  background: rgba(238, 89, 145, 0.08);
+  background: rgba(238, 89, 145, 0.14);
 }
 
 .inputs-summary {
@@ -303,12 +411,44 @@ a:hover {
 }
 
 .disclaimer-card {
-  background: #fff8fb;
-  border-color: rgba(238, 89, 145, 0.35) !important;
+  --bs-card-bg: rgba(255, 248, 251, 0.78);
+  background: rgba(255, 248, 251, 0.78) !important;
+  border-color: rgba(238, 89, 145, 0.4) !important;
 }
 
 .field-tip .tooltip-inner {
   text-align: left;
   max-width: 280px;
   font-size: 0.8rem;
+}
+
+/* Prefer solid panels when transparency is reduced */
+@media (prefers-reduced-transparency: reduce) {
+  body {
+    background-attachment: scroll;
+    background-image:
+      linear-gradient(180deg, #f0f4f6 0%, #e4eef2 100%),
+      url("/water-background.jpg");
+  }
+
+  .page__header,
+  .card,
+  .disclaimer-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.96) !important;
+  }
+
+  .amount-due {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--depth);
+  }
+}
+
+/* Fixed attachment can jank on mobile — use cover scroll instead */
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+  }
 }

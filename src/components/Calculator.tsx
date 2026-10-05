@@ -685,7 +685,7 @@ export function Calculator() {
               Same inputs under approved maxima through 2027. Capital & drought
               held at current selection.
             </p>
-            <div style={{ height: 260, width: "100%" }}>
+            <div className="chart-glass" style={{ height: 260, width: "100%" }}>
               <LineChart
                 dataset={chartDataset}
                 xAxis={[
@@ -701,7 +701,7 @@ export function Calculator() {
                 yAxis={[
                   {
                     width: 56,
-                    tickLabelStyle: { fontSize: 11, fill: "#555555" },
+                    tickLabelStyle: { fontSize: 11, fill: "#111111" },
                     valueFormatter: (value: number | null) => {
                       if (value == null || Number.isNaN(Number(value))) {
                         return "";
@@ -732,7 +732,7 @@ export function Calculator() {
                   {
                     dataKey: "sewer",
                     label: "Sewer",
-                    color: "#8c8c8c",
+                    color: "#555555",
                     curve: "linear",
                     showMark: true,
                     valueFormatter: (v) =>
@@ -755,6 +755,12 @@ export function Calculator() {
                 sx={{
                   "& .MuiChartsAxis-directionX .MuiChartsAxis-tickLabel": {
                     display: "none",
+                  },
+                  "& .MuiChartsGrid-line": {
+                    stroke: "rgba(17, 17, 17, 0.12)",
+                  },
+                  "& .MuiChartsLegend-series text": {
+                    fill: "#111111",
                   },
                 }}
               />
