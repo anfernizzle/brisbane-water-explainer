@@ -233,12 +233,52 @@ export function Calculator() {
 
   const collapsedSummary = `${rateYear} · ${meterSize} · ${waterUseCcf || 0} ccf · winter ${winterSewerAvgCcf || 0} · capital ${formatMoney(capitalAmount)} · drought ${formatMoney(droughtAmount)}`;
 
-  const chartYears = projections.map((p) => p.rateYear);
+  // String categories so every year tick label is forced visible.
+  const chartYearLabels = projections.map((p) => String(p.rateYear));
   const chartTotal = projections.map((p) => p.result.total);
   const chartWater = projections.map(
     (p) => p.result.waterUse + p.result.waterService,
   );
   const chartSewer = projections.map((p) => p.result.sewer);
+
+  const tableRows: Array<{
+    id: string;
+    label: string;
+    values: number[];
+    emphasize?: boolean;
+  }> = [
+    {
+      id: "waterUse",
+      label: "Water use",
+      values: projections.map((p) => p.result.waterUse),
+    },
+    {
+      id: "waterSvc",
+      label: "Water svc",
+      values: projections.map((p) => p.result.waterService),
+    },
+    {
+      id: "sewer",
+      label: "Sewer",
+      values: projections.map((p) => p.result.sewer),
+    },
+    {
+      id: "capital",
+      label: "Capital",
+      values: projections.map((p) => p.result.capital),
+    },
+    {
+      id: "drought",
+      label: "Drought",
+      values: projections.map((p) => p.result.drought),
+    },
+    {
+      id: "total",
+      label: "Total",
+      values: projections.map((p) => p.result.total),
+      emphasize: true,
+    },
+  ];
 
   return (
     <Stack spacing={1.5} className="calculator">
@@ -869,29 +909,34 @@ export function Calculator() {
               Same inputs under approved maxima through 2027. Capital & drought
               held at current selection.
             </Typography>
-            <Box sx={{ width: "100%", height: 280 }}>
+            <Box sx={{ width: "100%", height: 320 }}>
               <LineChart
                 xAxis={[
                   {
-                    data: chartYears,
+                    id: "years",
+                    data: chartYearLabels,
                     scaleType: "point",
-                    label: "Year",
-                    valueFormatter: (v) => String(v),
+                    // Force every year category to render a tick label.
+                    tickInterval: chartYearLabels,
+                    tickLabelInterval: () => true,
+                    tickSize: 6,
+                    height: 48,
+                    disableTicks: false,
                     tickLabelStyle: {
-                      fontSize: 12,
-                      fontWeight: 600,
+                      fontSize: 13,
+                      fontWeight: 700,
                       fill: "#182024",
                     },
                   },
                 ]}
                 yAxis={[
                   {
-                    label: "Dollars",
+                    label: "Dollars ($)",
                     valueFormatter: (v: number | null) =>
                       typeof v === "number"
                         ? `$${Math.round(v).toLocaleString("en-US")}`
                         : "",
-                    width: 64,
+                    width: 68,
                     tickLabelStyle: { fontSize: 11, fill: "#5a656c" },
                   },
                 ]}
@@ -924,7 +969,7 @@ export function Calculator() {
                       v == null ? "" : formatMoney(v),
                   },
                 ]}
-                margin={{ left: 8, right: 12, top: 24, bottom: 4 }}
+                margin={{ left: 10, right: 16, top: 28, bottom: 36 }}
                 grid={{ horizontal: true }}
                 slotProps={{
                   legend: {
@@ -934,61 +979,80 @@ export function Calculator() {
                 }}
               />
             </Box>
-            <TableContainer sx={{ mt: 1 }}>
+            <TableContainer sx={{ mt: 1.25 }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Year</TableCell>
-                    <TableCell align="right">Water</TableCell>
-                    <TableCell align="right">Sewer</TableCell>
-                    <TableCell align="right">Capital</TableCell>
-                    <TableCell align="right">Drought</TableCell>
-                    <TableCell align="right">Total</TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        color: "primary.dark",
+                        fontFamily:
+                          "var(--font-outfit), Outfit, sans-serif",
+                      }}
+                    >
+                      Line item
+                    </TableCell>
+                    {chartYearLabels.map((y) => (
+                      <TableCell
+                        key={y}
+                        align="right"
+                        sx={{
+                          fontWeight: 700,
+                          color:
+                            Number(y) === rateYear
+                              ? "primary.main"
+                              : "text.primary",
+                          bgcolor:
+                            Number(y) === rateYear
+                              ? "rgba(10, 92, 99, 0.08)"
+                              : undefined,
+                        }}
+                      >
+                        {y}
+                        {y === "2027" ? " *" : ""}
+                      </TableCell>
+                    ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {projections.map(({ rateYear: y, result: r }) => (
-                    <TableRow
-                      key={y}
-                      selected={y === rateYear}
-                      sx={{
-                        "& td, & th": {
-                          fontFamily:
-                            "var(--font-ibm-plex-mono), monospace",
-                          fontSize: "0.82rem",
-                        },
-                        "&.Mui-selected": {
-                          bgcolor: "rgba(10, 92, 99, 0.08)",
-                        },
-                      }}
-                    >
+                  {tableRows.map((row) => (
+                    <TableRow key={row.id}>
                       <TableCell
                         component="th"
                         scope="row"
                         sx={{
-                          fontWeight: 600,
+                          fontWeight: row.emphasize ? 700 : 600,
                           fontFamily:
-                            "var(--font-outfit), Outfit, sans-serif !important",
+                            "var(--font-outfit), Outfit, sans-serif",
+                          color: row.emphasize
+                            ? "text.primary"
+                            : "text.secondary",
                         }}
                       >
-                        {y}
-                        {y === 2027 ? " *" : ""}
+                        {row.label}
                       </TableCell>
-                      <TableCell align="right">
-                        {formatMoney(r.waterUse + r.waterService)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatMoney(r.sewer)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatMoney(r.capital)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatMoney(r.drought)}
-                      </TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700 }}>
-                        {formatMoney(r.total)}
-                      </TableCell>
+                      {row.values.map((value, idx) => {
+                        const y = Number(chartYearLabels[idx]);
+                        return (
+                          <TableCell
+                            key={`${row.id}-${y}`}
+                            align="right"
+                            sx={{
+                              fontFamily:
+                                "var(--font-ibm-plex-mono), monospace",
+                              fontSize: "0.82rem",
+                              fontWeight: row.emphasize ? 700 : 500,
+                              bgcolor:
+                                y === rateYear
+                                  ? "rgba(10, 92, 99, 0.08)"
+                                  : undefined,
+                            }}
+                          >
+                            {formatMoney(value)}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -999,7 +1063,8 @@ export function Calculator() {
               color="text.secondary"
               sx={{ mt: 0.75, display: "block" }}
             >
-              * 2027 is the last City-approved maximum schedule.
+              * 2027 is the last City-approved maximum schedule. Columns align
+              with the chart years above.
             </Typography>
           </Box>
         )}
