@@ -233,13 +233,14 @@ export function Calculator() {
 
   const collapsedSummary = `${rateYear} · ${meterSize} · ${waterUseCcf || 0} ccf · winter ${winterSewerAvgCcf || 0} · capital ${formatMoney(capitalAmount)} · drought ${formatMoney(droughtAmount)}`;
 
-  // String categories so every year tick label is forced visible.
-  const chartYearLabels = projections.map((p) => String(p.rateYear));
-  const chartTotal = projections.map((p) => p.result.total);
-  const chartWater = projections.map(
-    (p) => p.result.waterUse + p.result.waterService,
-  );
-  const chartSewer = projections.map((p) => p.result.sewer);
+  // Dataset keeps categories and series values aligned for MUI X Charts.
+  const chartDataset = projections.map((p) => ({
+    year: String(p.rateYear),
+    total: p.result.total,
+    water: p.result.waterUse + p.result.waterService,
+    sewer: p.result.sewer,
+  }));
+  const chartYearLabels = chartDataset.map((d) => d.year);
 
   const tableRows: Array<{
     id: string;
@@ -723,7 +724,8 @@ export function Calculator() {
           border: "1px solid",
           borderColor: "divider",
           borderRadius: 1.5,
-          overflow: "hidden",
+          // Do not clip chart axis tick labels
+          overflow: "visible",
         }}
       >
         <Box
@@ -909,77 +911,107 @@ export function Calculator() {
               Same inputs under approved maxima through 2027. Capital & drought
               held at current selection.
             </Typography>
-            <Box sx={{ width: "100%", height: 320 }}>
-              <LineChart
-                xAxis={[
-                  {
-                    id: "years",
-                    data: chartYearLabels,
-                    scaleType: "point",
-                    // Force every year category to render a tick label.
-                    tickInterval: chartYearLabels,
-                    tickLabelInterval: () => true,
-                    tickSize: 6,
-                    height: 48,
-                    disableTicks: false,
-                    tickLabelStyle: {
-                      fontSize: 13,
-                      fontWeight: 700,
-                      fill: "#182024",
+            <Box sx={{ width: "100%", pt: 0.5 }}>
+              <Box sx={{ width: "100%", height: 300 }}>
+                <LineChart
+                  dataset={chartDataset}
+                  xAxis={[
+                    {
+                      dataKey: "year",
+                      scaleType: "point",
+                      tickLabelInterval: () => true,
+                      tickLabelStyle: {
+                        fontSize: 13,
+                        fontWeight: 700,
+                        fill: "#182024",
+                      },
                     },
-                  },
-                ]}
-                yAxis={[
-                  {
-                    label: "Dollars ($)",
-                    valueFormatter: (v: number | null) =>
-                      typeof v === "number"
-                        ? `$${Math.round(v).toLocaleString("en-US")}`
-                        : "",
-                    width: 68,
-                    tickLabelStyle: { fontSize: 11, fill: "#5a656c" },
-                  },
-                ]}
-                series={[
-                  {
-                    data: chartTotal,
-                    label: "Total",
-                    color: "#0a5c63",
-                    curve: "linear",
-                    showMark: true,
-                    valueFormatter: (v) =>
-                      v == null ? "" : formatMoney(v),
-                  },
-                  {
-                    data: chartWater,
-                    label: "Water (use+svc)",
-                    color: "#2f6fed",
-                    curve: "linear",
-                    showMark: true,
-                    valueFormatter: (v) =>
-                      v == null ? "" : formatMoney(v),
-                  },
-                  {
-                    data: chartSewer,
-                    label: "Sewer",
-                    color: "#c45c26",
-                    curve: "linear",
-                    showMark: true,
-                    valueFormatter: (v) =>
-                      v == null ? "" : formatMoney(v),
-                  },
-                ]}
-                margin={{ left: 10, right: 16, top: 28, bottom: 36 }}
-                grid={{ horizontal: true }}
-                slotProps={{
-                  legend: {
-                    direction: "horizontal",
-                    position: { vertical: "top", horizontal: "center" },
-                  },
+                  ]}
+                  yAxis={[
+                    {
+                      width: 72,
+                      tickLabelStyle: { fontSize: 11, fill: "#5a656c" },
+                      valueFormatter: (value: number | null) => {
+                        if (value == null || Number.isNaN(Number(value))) {
+                          return "";
+                        }
+                        return `$${Math.round(Number(value)).toLocaleString("en-US")}`;
+                      },
+                    },
+                  ]}
+                  series={[
+                    {
+                      dataKey: "total",
+                      label: "Total",
+                      color: "#0a5c63",
+                      curve: "linear",
+                      showMark: true,
+                      valueFormatter: (v) =>
+                        v == null ? "" : formatMoney(Number(v)),
+                    },
+                    {
+                      dataKey: "water",
+                      label: "Water (use+svc)",
+                      color: "#2f6fed",
+                      curve: "linear",
+                      showMark: true,
+                      valueFormatter: (v) =>
+                        v == null ? "" : formatMoney(Number(v)),
+                    },
+                    {
+                      dataKey: "sewer",
+                      label: "Sewer",
+                      color: "#c45c26",
+                      curve: "linear",
+                      showMark: true,
+                      valueFormatter: (v) =>
+                        v == null ? "" : formatMoney(Number(v)),
+                    },
+                  ]}
+                  margin={{ left: 8, right: 12, top: 36, bottom: 40 }}
+                  grid={{ horizontal: true }}
+                  slotProps={{
+                    legend: {
+                      direction: "horizontal",
+                      position: { vertical: "top", horizontal: "center" },
+                    },
+                  }}
+                />
+              </Box>
+              {/* Guaranteed visible year labels under the plot */}
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "72px repeat(5, 1fr) 12px",
+                  alignItems: "center",
+                  mt: -0.25,
+                  mb: 0.75,
                 }}
-              />
+              >
+                <Box />
+                {chartYearLabels.map((y) => (
+                  <Typography
+                    key={y}
+                    component="span"
+                    sx={{
+                      textAlign: "center",
+                      fontWeight: 700,
+                      fontSize: "0.85rem",
+                      color:
+                        Number(y) === rateYear
+                          ? "primary.main"
+                          : "text.primary",
+                      fontFamily:
+                        "var(--font-outfit), Outfit, sans-serif",
+                    }}
+                  >
+                    {y}
+                  </Typography>
+                ))}
+                <Box />
+              </Box>
             </Box>
-            <TableContainer sx={{ mt: 1.25 }}>
+            <TableContainer sx={{ mt: 0.5 }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
