@@ -71,17 +71,61 @@ const theme = createTheme({
     MuiTextField: {
       defaultProps: {
         size: "small",
-        variant: "outlined",
+        variant: "filled",
+      },
+      styleOverrides: {
+        root: {
+          "& .MuiFilledInput-root": {
+            backgroundColor: "#eef2f3",
+            borderRadius: 6,
+            border: "1px solid #dce3e6",
+            "&:before, &:after": { display: "none" },
+            "&:hover": { backgroundColor: "#e7ecee" },
+            "&.Mui-focused": {
+              backgroundColor: "#e7ecee",
+              borderColor: "#0a5c63",
+            },
+          },
+        },
       },
     },
     MuiFormControl: {
       defaultProps: {
         size: "small",
+        variant: "filled",
       },
     },
     MuiSelect: {
       defaultProps: {
         size: "small",
+        variant: "filled",
+      },
+      styleOverrides: {
+        filled: {
+          backgroundColor: "#eef2f3",
+          borderRadius: 6,
+          border: "1px solid #dce3e6",
+          "&:hover": { backgroundColor: "#e7ecee" },
+          "&.Mui-focused": {
+            backgroundColor: "#e7ecee",
+            borderColor: "#0a5c63",
+          },
+        },
+      },
+    },
+    MuiFilledInput: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#eef2f3",
+          borderRadius: 6,
+          border: "1px solid #dce3e6",
+          "&:before, &:after": { display: "none" },
+          "&:hover": { backgroundColor: "#e7ecee" },
+          "&.Mui-focused": {
+            backgroundColor: "#e7ecee",
+            borderColor: "#0a5c63",
+          },
+        },
       },
     },
     MuiTooltip: {

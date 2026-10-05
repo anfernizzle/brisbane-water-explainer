@@ -35,8 +35,8 @@ import {
   faChevronDown,
   faChevronRight,
   faCircleInfo,
-  faCompress,
-  faExpand,
+  faCaretDown,
+  faCaretUp,
   faRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -271,15 +271,19 @@ export function Calculator() {
             textAlign: "left",
             font: "inherit",
             color: "inherit",
-            bgcolor: inputsOpen ? "background.paper" : "action.hover",
+            bgcolor: "#e8f1f2",
             borderBottom: inputsOpen ? "1px solid" : "none",
             borderColor: "divider",
-            "&:hover": { bgcolor: "action.hover" },
+            "&:hover": { bgcolor: "#deebed" },
           }}
         >
           <Typography
             variant="subtitle2"
-            sx={{ fontWeight: 700, flex: "0 0 auto" }}
+            sx={{
+              fontWeight: 700,
+              flex: "0 0 auto",
+              color: "primary.dark",
+            }}
           >
             Bill inputs
           </Typography>
@@ -300,8 +304,8 @@ export function Calculator() {
           )}
           <Box sx={{ flex: inputsOpen ? 1 : 0 }} />
           <FontAwesomeIcon
-            icon={inputsOpen ? faCompress : faExpand}
-            style={{ fontSize: 14, color: "#5a656c" }}
+            icon={inputsOpen ? faCaretUp : faCaretDown}
+            style={{ fontSize: 16, color: "#0a5c63" }}
             aria-hidden
           />
         </Box>
@@ -693,9 +697,13 @@ export function Calculator() {
             borderBottom: "1px solid",
             borderColor: "divider",
             flexWrap: "wrap",
+            bgcolor: "#e8f1f2",
           }}
         >
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{ fontWeight: 700, color: "primary.dark" }}
+          >
             Estimated bill
           </Typography>
           <ToggleButtonGroup
@@ -861,14 +869,30 @@ export function Calculator() {
               Same inputs under approved maxima through 2027. Capital & drought
               held at current selection.
             </Typography>
-            <Box sx={{ width: "100%", height: 260 }}>
+            <Box sx={{ width: "100%", height: 280 }}>
               <LineChart
                 xAxis={[
                   {
                     data: chartYears,
                     scaleType: "point",
+                    label: "Year",
                     valueFormatter: (v) => String(v),
-                    label: "Rate year",
+                    tickLabelStyle: {
+                      fontSize: 12,
+                      fontWeight: 600,
+                      fill: "#182024",
+                    },
+                  },
+                ]}
+                yAxis={[
+                  {
+                    label: "Dollars",
+                    valueFormatter: (v: number | null) =>
+                      typeof v === "number"
+                        ? `$${Math.round(v).toLocaleString("en-US")}`
+                        : "",
+                    width: 64,
+                    tickLabelStyle: { fontSize: 11, fill: "#5a656c" },
                   },
                 ]}
                 series={[
@@ -900,7 +924,7 @@ export function Calculator() {
                       v == null ? "" : formatMoney(v),
                   },
                 ]}
-                margin={{ left: 16, right: 16, top: 20, bottom: 8 }}
+                margin={{ left: 8, right: 12, top: 24, bottom: 4 }}
                 grid={{ horizontal: true }}
                 slotProps={{
                   legend: {
@@ -917,7 +941,8 @@ export function Calculator() {
                     <TableCell>Year</TableCell>
                     <TableCell align="right">Water</TableCell>
                     <TableCell align="right">Sewer</TableCell>
-                    <TableCell align="right">Cap+Dr</TableCell>
+                    <TableCell align="right">Capital</TableCell>
+                    <TableCell align="right">Drought</TableCell>
                     <TableCell align="right">Total</TableCell>
                   </TableRow>
                 </TableHead>
@@ -956,7 +981,10 @@ export function Calculator() {
                         {formatMoney(r.sewer)}
                       </TableCell>
                       <TableCell align="right">
-                        {formatMoney(r.capital + r.drought)}
+                        {formatMoney(r.capital)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatMoney(r.drought)}
                       </TableCell>
                       <TableCell align="right" sx={{ fontWeight: 700 }}>
                         {formatMoney(r.total)}
@@ -988,7 +1016,10 @@ export function Calculator() {
           p: 1.5,
         }}
       >
-        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: 700, mb: 0.5, color: "primary.dark" }}
+        >
           Unofficial explainer
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
