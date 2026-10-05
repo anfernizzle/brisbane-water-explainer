@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Google_Sans, Outfit, IBM_Plex_Mono } from "next/font/google";
 import { AppProviders } from "@/components/AppProviders";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 
 const outfit = Outfit({
