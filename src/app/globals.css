@@ -493,7 +493,8 @@ button.card-header:hover {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  margin-right: var(--space-2);
+  margin-right: var(--space-4);
+  margin-bottom: var(--space-1);
   vertical-align: middle;
   flex-shrink: 0;
 }
