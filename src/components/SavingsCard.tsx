@@ -67,7 +67,9 @@ export function SavingsCard({ baseline }: Props) {
         instead of{" "}
         <strong className="savings-card__em">
           {formatCcf(scenario.baselineWaterUse)}
-        </strong>
+        </strong>{" "}
+        in{" "}
+        <strong className="savings-card__em">{baseline.rateYear}</strong>
         …
       </p>
 
@@ -137,7 +139,9 @@ export function SavingsCard({ baseline }: Props) {
         Winter sewer avg scales with usage similar to the relationship in bill
         inputs. Capital Project Charges &amp; Drought Contingency remain
         unchanged with this slider. This estimate assumes consistent usage
-        across billing periods; actual usage and bills will vary. Figures are
+        across billing periods for the noted year&apos;s rate structure; actual
+        usage and bills will vary. Billing rates go into effect starting June 15
+        of that year until June 15 of the following calendar year. Figures are
         for informational purposes only and should not be treated as a precise
         forecast.
       </p>
