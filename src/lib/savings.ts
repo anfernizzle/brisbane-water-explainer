@@ -126,13 +126,23 @@ const BREAKDOWN_LINES: Array<{
   { key: "drought", label: "Drought Contingency" },
 ];
 
+/** Positive savings lines for the breakdown sentence (amount > 0 only). */
+export function positiveSavingsLines(
+  savings: LineSavings,
+): Array<{ amount: number; label: string }> {
+  return BREAKDOWN_LINES.filter(({ key }) => savings[key] > 0).map(
+    ({ key, label }) => ({ amount: savings[key], label }),
+  );
+}
+
 /**
  * Build the “That’s $… on Water Use and …” sentence. Only includes lines with
  * savings > $0 (omits zero capital/drought when bands don’t change).
  */
 export function formatPositiveSavingsSentence(savings: LineSavings): string {
-  const parts = BREAKDOWN_LINES.filter(({ key }) => savings[key] > 0).map(
-    ({ key, label }) => `${formatMoney(savings[key])} savings on ${label}`,
+  const lines = positiveSavingsLines(savings);
+  const parts = lines.map(
+    ({ amount, label }) => `${formatMoney(amount)} savings on ${label}`,
   );
   if (parts.length === 0) {
     return "No line-item savings at this usage level.";

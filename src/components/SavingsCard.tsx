@@ -10,7 +10,7 @@ import {
   defaultSimulatedUsage,
   formatCcf,
   formatPercentWhole,
-  formatPositiveSavingsSentence,
+  positiveSavingsLines,
   SAVINGS_USAGE_FLOOR,
   waterReductionPercent,
 } from "@/lib/savings";
@@ -49,10 +49,39 @@ export function SavingsCard({ baseline }: Props) {
   );
   const perBill = scenario.savings.total;
   const perYear = annualizeSavings(perBill);
-  const breakdown = formatPositiveSavingsSentence(scenario.savings);
+  const breakdownLines = positiveSavingsLines(scenario.savings);
 
   const max = baselineWater;
   const sliderDisabled = max <= SAVINGS_USAGE_FLOOR;
+
+  function renderBreakdown() {
+    if (breakdownLines.length === 0) {
+      return "No line-item savings at this usage level.";
+    }
+    return (
+      <>
+        That&apos;s{" "}
+        {breakdownLines.map((line, i) => {
+          let joiner = "";
+          if (i > 0) {
+            if (breakdownLines.length === 2) joiner = " and ";
+            else if (i === breakdownLines.length - 1) joiner = ", and ";
+            else joiner = ", ";
+          }
+          return (
+            <span key={line.label}>
+              {joiner}
+              <strong className="savings-card__em">
+                {formatMoney(line.amount)}
+              </strong>{" "}
+              savings on {line.label}
+            </span>
+          );
+        })}{" "}
+        per bill.
+      </>
+    );
+  }
 
   return (
     <section className="savings-card" aria-labelledby="savings-card-title">
@@ -124,7 +153,7 @@ export function SavingsCard({ baseline }: Props) {
         </div>
       </div>
 
-      <p className="savings-card__breakdown">{breakdown}</p>
+      <p className="savings-card__breakdown">{renderBreakdown()}</p>
 
       <p className="savings-card__note">
         Winter sewer avg scales with usage similar to the relationship in bill
