@@ -275,14 +275,23 @@ export function Calculator() {
         <button
           ref={inputsAnchorRef}
           type="button"
-          className="card-header section-header d-flex align-items-center gap-2 w-100 text-start border-0"
+          className="card-header section-header inputs-header w-100 text-start border-0"
           onClick={toggleInputs}
           aria-expanded={inputsOpen}
           aria-controls="bill-inputs-panel"
         >
-          <span className="section-title">Bill inputs</span>
+          <div className="inputs-header__top">
+            <span className="section-title">Bill inputs</span>
+            <span className="inputs-header__caret">
+              <FontAwesomeIcon
+                icon={inputsOpen ? faCaretUp : faCaretDown}
+                className="collapse-caret"
+                aria-hidden
+              />
+            </span>
+          </div>
           {!inputsOpen && (
-            <span className="inputs-summary flex-grow-1">
+            <span className="inputs-summary">
               <span className="inputs-summary__item">
                 <span className="inputs-summary__key">Year</span>
                 {rateYear}
@@ -300,13 +309,6 @@ export function Calculator() {
               </span>
             </span>
           )}
-          <span className="ms-auto">
-            <FontAwesomeIcon
-              icon={inputsOpen ? faCaretUp : faCaretDown}
-              className="collapse-caret"
-              aria-hidden
-            />
-          </span>
         </button>
         <Collapse in={inputsOpen}>
           <div id="bill-inputs-panel">

@@ -510,6 +510,13 @@ button.card-header:hover {
   overflow: hidden;
 }
 
+.years-panel .table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  margin-bottom: var(--space-2);
+}
+
 .table-years th {
   font-family: var(--font-display);
   font-weight: 700;
@@ -602,7 +609,8 @@ button.card-header:hover {
   font-size: 1rem;
   font-weight: 400;
   min-width: 0;
-  margin: 0 var(--space-3);
+  width: 100%;
+  margin: var(--space-3) 0 0;
 }
 
 .inputs-summary__item {
@@ -613,6 +621,27 @@ button.card-header:hover {
   color: var(--bs-gray-600);
   font-weight: 600;
   margin-right: var(--space-2);
+}
+
+/* Bill inputs: title row + summary row (mobile-friendly, matches Estimated bill breathing) */
+.inputs-header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.inputs-header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.inputs-header__caret {
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 /* Segmented pill toggle (Own/Rent-style reference) */
@@ -740,6 +769,9 @@ button.card-header:hover {
 
 .savings-card__lead {
   margin-bottom: var(--space-5);
+  /* Keep slider from shifting card height when ccf values grow (e.g. 9.5 → 19) */
+  font-size: clamp(1rem, 2.8vw, 1.25rem);
+  white-space: nowrap;
 }
 
 .savings-card__payoff-lead {
@@ -918,7 +950,69 @@ button.card-header:hover {
   }
 
   .inputs-summary {
-    justify-content: flex-start;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .savings-card__lead {
+    font-size: 1rem;
+  }
+
+  .segmented-toggle {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+}
+
+/* Fixed back-to-top — glass / Google blue, bottom-right */
+.back-to-top {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 1100;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(26, 115, 232, 0.92);
+  color: #fff;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s ease,
+    background 0.15s ease;
+}
+
+.back-to-top--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  background: #174ea6;
+}
+
+.back-to-top:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back-to-top {
+    transition: none;
   }
 }
 
@@ -979,5 +1073,19 @@ button.card-header:hover {
 @media (max-width: 768px) {
   body {
     background-attachment: scroll;
+  }
+
+  /* Year headers scroll instead of wrapping on narrow/tablet portrait */
+  .table-years {
+    table-layout: auto;
+    width: max-content;
+    min-width: 100%;
+    overflow: visible;
+  }
+
+  .table-years .year-col,
+  .table-years thead th.year-col {
+    white-space: nowrap;
+    min-width: 4.25rem;
   }
 }
