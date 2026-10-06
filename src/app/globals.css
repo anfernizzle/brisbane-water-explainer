@@ -617,12 +617,13 @@ button.card-header:hover {
 
 /* Segmented pill toggle (Own/Rent-style reference) */
 .segmented-toggle {
+  --toggle-inset: var(--space-1);
   position: relative;
   display: inline-grid;
   grid-template-columns: 1fr 1fr;
   align-items: stretch;
   min-width: 248px;
-  padding: var(--space-1);
+  padding: var(--toggle-inset);
   background: #ececec;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 999px;
@@ -630,10 +631,11 @@ button.card-header:hover {
 
 .segmented-toggle__thumb {
   position: absolute;
-  top: var(--space-1);
-  bottom: var(--space-1);
-  left: var(--space-1);
-  width: calc(50% - var(--space-1));
+  top: var(--toggle-inset);
+  bottom: var(--toggle-inset);
+  left: var(--toggle-inset);
+  /* Half of the inner track so both sides keep equal inset */
+  width: calc(50% - var(--toggle-inset));
   background: #ffffff;
   border-radius: 999px;
   box-shadow:
@@ -641,10 +643,12 @@ button.card-header:hover {
     0 2px 8px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease;
   pointer-events: none;
+  transform: translateX(0);
 }
 
 .segmented-toggle[data-view="years"] .segmented-toggle__thumb {
-  transform: translateX(calc(100% + var(--space-1)));
+  /* One thumb-width → right edge lands at 100% − inset (symmetric) */
+  transform: translateX(100%);
 }
 
 .segmented-toggle__option {
