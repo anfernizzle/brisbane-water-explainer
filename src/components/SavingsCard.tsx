@@ -5,30 +5,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDroplet } from "@fortawesome/free-solid-svg-icons";
 import { formatMoney, type BillInputs } from "@/lib/calculate";
 import {
+  annualizeSavings,
   buildSavingsScenario,
   defaultSimulatedUsage,
   formatCcf,
+  formatPercentWhole,
   SAVINGS_USAGE_FLOOR,
+  waterReductionPercent,
 } from "@/lib/savings";
 
 type Props = {
   /** Current bill inputs — used as the what-if baseline only (never mutated). */
   baseline: BillInputs;
 };
-
-const LINE_ORDER = [
-  { key: "waterUse" as const, label: "Water use" },
-  { key: "waterService" as const, label: "Water svc" },
-  { key: "sewer" as const, label: "Sewer" },
-  { key: "capital" as const, label: "Capital" },
-  { key: "drought" as const, label: "Drought" },
-];
-
-function formatDelta(n: number): string {
-  if (n === 0) return formatMoney(0);
-  const abs = formatMoney(Math.abs(n));
-  return n > 0 ? `−${abs}` : `+${abs}`;
-}
 
 export function SavingsCard({ baseline }: Props) {
   const baselineWater = Math.max(0, baseline.waterUseCcf);
@@ -53,6 +42,13 @@ export function SavingsCard({ baseline }: Props) {
     [baseline, simWater],
   );
 
+  const reductionPct = waterReductionPercent(
+    scenario.baselineWaterUse,
+    scenario.simulatedWaterUse,
+  );
+  const perBill = scenario.savings.total;
+  const perYear = annualizeSavings(perBill);
+
   const max = baselineWater;
   const sliderDisabled = max <= SAVINGS_USAGE_FLOOR;
 
@@ -65,21 +61,47 @@ export function SavingsCard({ baseline }: Props) {
 
       <p className="savings-card__sentence">
         If you used{" "}
-        <strong className="savings-card__ccf">
+        <strong className="savings-card__em">
           {formatCcf(scenario.simulatedWaterUse)} ccf
         </strong>{" "}
         instead of{" "}
-        <strong className="savings-card__ccf">
+        <strong className="savings-card__em">
           {formatCcf(scenario.baselineWaterUse)}
         </strong>
-        … you&apos;d save about
+        … you&apos;d use about{" "}
+        <strong className="savings-card__em">
+          {formatPercentWhole(reductionPct)}%
+        </strong>{" "}
+        less water and save about…
       </p>
 
-      <p className="savings-card__hero" aria-live="polite">
-        <span className="savings-card__hero-amount">
-          {formatMoney(scenario.savings.total)}
-        </span>
-        <span className="savings-card__hero-unit">per bill</span>
+      <div className="savings-card__totals" aria-live="polite">
+        <div className="savings-card__total savings-card__total--bill">
+          <span className="savings-card__total-amount">
+            {formatMoney(perBill)}
+          </span>
+          <span className="savings-card__total-label">per bill</span>
+        </div>
+        <div className="savings-card__total savings-card__total--year">
+          <span className="savings-card__total-amount">
+            {formatMoney(perYear)}
+          </span>
+          <span className="savings-card__total-label">
+            per year <span className="savings-card__total-hint">(×6 bills)</span>
+          </span>
+        </div>
+      </div>
+
+      <p className="savings-card__breakdown">
+        That&apos;s{" "}
+        <strong className="savings-card__em">
+          {formatMoney(scenario.savings.waterUse)}
+        </strong>{" "}
+        savings on Water Use and{" "}
+        <strong className="savings-card__em">
+          {formatMoney(scenario.savings.sewer)}
+        </strong>{" "}
+        savings on Sewer Charges.
       </p>
 
       <div className="savings-card__slider-wrap">
@@ -109,19 +131,9 @@ export function SavingsCard({ baseline }: Props) {
 
       <p className="savings-card__note">
         Winter sewer avg scales with usage (same link as Bill inputs). Capital
-        &amp; drought stay at your current selection.
+        &amp; drought stay at your current selection — they don&apos;t change
+        with this slider.
       </p>
-
-      <ul className="savings-card__lines">
-        {LINE_ORDER.map(({ key, label }) => (
-          <li key={key}>
-            <span>{label}</span>
-            <span className="savings-card__delta money">
-              {formatDelta(scenario.savings[key])}
-            </span>
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }

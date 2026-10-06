@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
+  annualizeSavings,
+  BILLS_PER_YEAR,
   buildSavingsScenario,
   clampSimulatedUsage,
   defaultSimulatedUsage,
   formatCcf,
+  formatPercentWhole,
   scaleWinterWithUsage,
+  waterReductionPercent,
 } from "./savings";
 import { estimateWinterSewerAvg } from "./suggestions";
 import type { BillInputs } from "./calculate";
@@ -98,5 +102,30 @@ describe("formatCcf", () => {
   it("omits trailing .0 for whole numbers", () => {
     expect(formatCcf(19)).toBe("19");
     expect(formatCcf(9.5)).toBe("9.5");
+  });
+});
+
+describe("waterReductionPercent", () => {
+  it("rounds percent less water vs baseline", () => {
+    // (19 - 9.5) / 19 ≈ 50%
+    expect(waterReductionPercent(19, 9.5)).toBe(50);
+    expect(waterReductionPercent(19, 19)).toBe(0);
+    expect(waterReductionPercent(19, 0)).toBe(100);
+    expect(waterReductionPercent(0, 0)).toBe(0);
+  });
+});
+
+describe("annualizeSavings", () => {
+  it("multiplies per-bill savings by 6 bimonthly bills", () => {
+    expect(BILLS_PER_YEAR).toBe(6);
+    expect(annualizeSavings(205.7)).toBe(1234.2);
+    expect(annualizeSavings(0)).toBe(0);
+  });
+});
+
+describe("formatPercentWhole", () => {
+  it("formats whole percents for copy", () => {
+    expect(formatPercentWhole(50)).toBe("50");
+    expect(formatPercentWhole(49.6)).toBe("50");
   });
 });

@@ -3,6 +3,9 @@ import { calculateBill, roundCents, type BillInputs, type BillResult } from "./c
 /** Slider floor for the what-if water-use scenario (ccf). */
 export const SAVINGS_USAGE_FLOOR = 0;
 
+/** Brisbane residential bills are bimonthly → 6 bills per year. */
+export const BILLS_PER_YEAR = 6;
+
 export type LineSavings = {
   waterUse: number;
   waterService: number;
@@ -110,4 +113,33 @@ export function buildSavingsScenario(
 export function formatCcf(n: number): string {
   if (!Number.isFinite(n)) return "0";
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+/**
+ * Percent less water used vs baseline (0–100). Whole number for copy.
+ * Baseline 0 → 0%. Simulated above baseline clamps at 0%.
+ */
+export function waterReductionPercent(
+  baselineWater: number,
+  simulatedWater: number,
+): number {
+  const base = Number.isFinite(baselineWater) ? Math.max(0, baselineWater) : 0;
+  const sim = Number.isFinite(simulatedWater) ? Math.max(0, simulatedWater) : 0;
+  if (base <= 0) return 0;
+  const pct = ((base - Math.min(sim, base)) / base) * 100;
+  return Math.round(pct);
+}
+
+/** Annualize a per-bill savings amount (bimonthly × 6). */
+export function annualizeSavings(
+  perBill: number,
+  billsPerYear = BILLS_PER_YEAR,
+): number {
+  return roundCents(perBill * billsPerYear);
+}
+
+/** Format a whole-number percent for UI copy (no “%” suffix). */
+export function formatPercentWhole(n: number): string {
+  if (!Number.isFinite(n)) return "0";
+  return String(Math.round(n));
 }
