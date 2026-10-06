@@ -354,24 +354,81 @@ button.card-header:hover {
   width: 12px;
 }
 
-.bill-line--total .bill-line__label,
-.bill-line--total .bill-line__amount {
-  color: var(--ink);
-  font-weight: 700;
-}
-
-.bill-detail-footnote {
-  font-size: 0.875rem;
-  color: var(--bs-gray-600);
-  padding: var(--space-2) var(--space-4) var(--space-1);
-}
-
 .bill-line__formula {
   font-family: var(--font-code);
   font-size: 0.875rem;
   color: var(--ink-soft);
   padding: 0 var(--space-4) var(--space-3) 40px;
   margin: 0;
+}
+
+.estimated-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.estimated-header__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.bill-detail-footnote {
+  font-size: 0.875rem;
+  color: var(--bs-gray-600);
+  font-weight: 400;
+  margin: 0;
+}
+
+.amount-due {
+  background: var(--glass-amount);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  color: #fff;
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.amount-due__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.amount-due__label {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.amount-due__total {
+  font-family: var(--font-code);
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3.5vw, 1.875rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.amount-due__formula {
+  font-family: var(--font-code);
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.88);
+  margin-top: var(--space-3);
 }
 
 .years-panel {
@@ -445,9 +502,13 @@ button.card-header:hover {
   font-size: 1.0625rem;
 }
 
+/* Selected-year Total: dark bar treatment matching Amount due */
 .table-years .total-row td.year-current {
   font-weight: 700;
   font-size: 1.25rem;
+  color: #ffffff;
+  background: var(--glass-amount);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .inputs-summary {
@@ -638,6 +699,12 @@ button.card-header:hover {
     background: rgba(255, 255, 255, 0.96) !important;
   }
 
+  .amount-due,
+  .table-years .total-row td.year-current {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--depth);
+  }
 }
 
 @media (max-width: 768px) {

@@ -423,40 +423,49 @@ export function Calculator() {
 
       {/* ESTIMATED BILL */}
       <Card>
-        <Card.Header className="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <span className="section-title">Estimated bill</span>
-          <div
-            className="segmented-toggle"
-            data-view={resultView}
-            role="radiogroup"
-            aria-label="Bill result view"
-          >
-            <span className="segmented-toggle__thumb" aria-hidden />
-            <button
-              type="button"
-              role="radio"
-              aria-checked={resultView === "bill"}
-              className={`segmented-toggle__option${
-                resultView === "bill" ? " segmented-toggle__option--active" : ""
-              }`}
-              onClick={() => setResultView("bill")}
+        <Card.Header className="section-header estimated-header">
+          <div className="estimated-header__row">
+            <span className="section-title">Estimated bill</span>
+            <div
+              className="segmented-toggle"
+              data-view={resultView}
+              role="radiogroup"
+              aria-label="Bill result view"
             >
-              {rateYear} detail
-            </button>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={resultView === "years"}
-              className={`segmented-toggle__option${
-                resultView === "years"
-                  ? " segmented-toggle__option--active"
-                  : ""
-              }`}
-              onClick={() => setResultView("years")}
-            >
-              All years
-            </button>
+              <span className="segmented-toggle__thumb" aria-hidden />
+              <button
+                type="button"
+                role="radio"
+                aria-checked={resultView === "bill"}
+                className={`segmented-toggle__option${
+                  resultView === "bill"
+                    ? " segmented-toggle__option--active"
+                    : ""
+                }`}
+                onClick={() => setResultView("bill")}
+              >
+                {rateYear} detail
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={resultView === "years"}
+                className={`segmented-toggle__option${
+                  resultView === "years"
+                    ? " segmented-toggle__option--active"
+                    : ""
+                }`}
+                onClick={() => setResultView("years")}
+              >
+                All years
+              </button>
+            </div>
           </div>
+          {resultView === "bill" && (
+            <p className="bill-detail-footnote mb-0">
+              Tap any line to see how it&apos;s calculated.
+            </p>
+          )}
         </Card.Header>
 
         {resultView === "bill" ? (
@@ -488,35 +497,25 @@ export function Calculator() {
                   </div>
                 );
               })}
-              <div>
-                <button
-                  type="button"
-                  className="bill-line bill-line--total"
-                  aria-expanded={!!expanded.total}
-                  onClick={() => toggleLine("total")}
-                >
-                  <FontAwesomeIcon
-                    icon={
-                      expanded.total ? faChevronDown : faChevronRight
-                    }
-                    className="bill-line__chevron"
-                    aria-hidden
-                  />
-                  <span className="bill-line__label">
-                    Amount due – {rateYear}
-                  </span>
-                  <span className="bill-line__amount money">
-                    {formatMoney(totalLine.amount)}
-                  </span>
-                </button>
-                <Collapse in={!!expanded.total}>
-                  <p className="bill-line__formula">{totalLine.formula}</p>
-                </Collapse>
-              </div>
-              <p className="bill-detail-footnote mb-0">
-                Tap any line to see how it&apos;s calculated.
-              </p>
             </Card.Body>
+            <div className="amount-due">
+              <button
+                type="button"
+                className="amount-due__row"
+                aria-expanded={!!expanded.total}
+                onClick={() => toggleLine("total")}
+              >
+                <span className="amount-due__label">
+                  Amount due – {rateYear}
+                </span>
+                <span className="amount-due__total money">
+                  {formatMoney(totalLine.amount)}
+                </span>
+              </button>
+              <Collapse in={!!expanded.total}>
+                <p className="amount-due__formula mb-0">{totalLine.formula}</p>
+              </Collapse>
+            </div>
           </>
         ) : (
           <Card.Body className="years-panel">
