@@ -309,7 +309,7 @@ export function Calculator() {
                 <Col xs={6} sm={3}>
                   <FieldLabel
                     label="Rate year"
-                    tip="Approved maxima through 2027. Rates effective June 15 appear on the August bill."
+                    tip="Billing rates for that year go into effect from June 15th of that year to June 15th of the following year. Schedules run through 2027; new rates first show on the August bill."
                   />
                   <Form.Select
                     value={rateYear}
@@ -573,7 +573,7 @@ export function Calculator() {
         ) : (
           <Card.Body className="years-panel">
             <p className="text-secondary mb-3">
-              Same inputs under approved maxima through 2027. Capital & drought
+              Same inputs under each rate year through 2027. Capital & drought
               held at current selection.
             </p>
             <div className="chart-glass">
