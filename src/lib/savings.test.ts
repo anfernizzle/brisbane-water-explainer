@@ -48,9 +48,11 @@ describe("clampSimulatedUsage / defaultSimulatedUsage", () => {
     expect(clampSimulatedUsage(10, 19)).toBe(10);
   });
 
-  it("defaults to about half baseline (nearest 0.5)", () => {
-    expect(defaultSimulatedUsage(19)).toBe(9.5);
-    expect(defaultSimulatedUsage(10)).toBe(5);
+  it("defaults to baseline − 1 ccf (floor at 0)", () => {
+    expect(defaultSimulatedUsage(19)).toBe(18);
+    expect(defaultSimulatedUsage(10)).toBe(9);
+    expect(defaultSimulatedUsage(1)).toBe(0);
+    expect(defaultSimulatedUsage(0.5)).toBe(0);
     expect(defaultSimulatedUsage(0)).toBe(0);
   });
 });

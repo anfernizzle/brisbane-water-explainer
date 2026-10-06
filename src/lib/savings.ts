@@ -58,10 +58,10 @@ export function clampSimulatedUsage(
   return Math.min(base, Math.max(lo, sim));
 }
 
-/** Default slider target: ~half of baseline usage, nearest 0.5 ccf. */
+/** Default slider target: current water use − 1 ccf (floor at 0). */
 export function defaultSimulatedUsage(baselineWater: number): number {
   const base = Number.isFinite(baselineWater) ? Math.max(0, baselineWater) : 0;
-  return clampSimulatedUsage(Math.round(base) / 2, base);
+  return clampSimulatedUsage(base - 1, base);
 }
 
 /**
