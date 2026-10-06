@@ -412,7 +412,9 @@ export function Calculator() {
                         >
                           Capital Projects Charge
                         </a>{" "}
-                        spring-usage bands. Pick another band if your bill
+                        bands. Based on average water use from mid-February
+                        through mid-June. The resulting charge is reset once a
+                        year on the August bill. Pick another band if your bill
                         differs.
                       </span>
                     }
