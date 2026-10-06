@@ -652,6 +652,178 @@ button.card-header:hover {
   color: var(--accent-ink);
 }
 
+/* What could I save? — isolated usage what-if (Google blue, white hierarchy) */
+.savings-card {
+  --savings-blue: #174ea6;
+  --savings-blue-bright: #1a73e8;
+  background:
+    radial-gradient(
+      120% 80% at 10% 0%,
+      rgba(255, 255, 255, 0.14),
+      transparent 55%
+    ),
+    linear-gradient(160deg, var(--savings-blue-bright) 0%, var(--savings-blue) 72%);
+  color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  box-shadow: var(--glass-shadow);
+  padding: var(--space-7) var(--space-7) var(--space-6);
+  margin-bottom: var(--space-7);
+}
+
+.savings-card__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.savings-card__icon {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.savings-card__sentence {
+  margin: 0 0 var(--space-3);
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 36rem;
+}
+
+.savings-card__ccf {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.savings-card__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-6);
+}
+
+.savings-card__hero-amount {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.savings-card__hero-unit {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.savings-card__slider-wrap {
+  max-width: 28rem;
+  margin: 0 0 var(--space-4);
+}
+
+.savings-card__slider-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.savings-card__slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  outline: none;
+  cursor: pointer;
+}
+
+.savings-card__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(23, 78, 166, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.savings-card__slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(23, 78, 166, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.savings-card__slider:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.savings-card__slider:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.savings-card__slider-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+
+.savings-card__note {
+  margin: 0 0 var(--space-5);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.55);
+  max-width: 36rem;
+}
+
+.savings-card__lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 22rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.savings-card__lines li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.58);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.savings-card__delta {
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .disclaimer-alert {
   --bs-alert-bg: rgba(232, 240, 254, 0.72);
   --bs-alert-border-color: rgba(26, 115, 232, 0.35);

@@ -49,6 +49,7 @@ import {
   type DroughtPresetId,
   type LinkedUsageWinter,
 } from "@/lib/suggestions";
+import { SavingsCard } from "@/components/SavingsCard";
 
 type ResultView = "bill" | "years";
 
@@ -764,6 +765,8 @@ export function Calculator() {
           </Card.Body>
         )}
       </Card>
+
+      <SavingsCard baseline={inputs} />
 
       {/* DISCLAIMER */}
       <Alert variant="primary" className="disclaimer-alert mb-0">
