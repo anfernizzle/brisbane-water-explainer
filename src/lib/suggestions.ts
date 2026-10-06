@@ -6,6 +6,15 @@ export type DroughtPresetId = (typeof DROUGHT_PRESETS)[number]["id"];
 export const DROUGHT_MEDIAN_CCF = 12;
 
 /**
+ * Default winter sewer avg estimate: water use × 1.15, rounded to nearest 0.5 ccf.
+ * Users should verify against their bill — this drives the sewer charge directly.
+ */
+export function estimateWinterSewerAvg(waterUseCcf: number): number {
+  const usage = Number.isFinite(waterUseCcf) ? Math.max(0, waterUseCcf) : 0;
+  return Math.round(usage * 1.15 * 2) / 2;
+}
+
+/**
  * Map bimonthly usage (ccf) → Capital Projects Charge band (2022 table).
  * Proxy: uses entered water-use when spring average is unknown.
  * Units are treated as whole ccf for banding (floored); 0 stays 0.

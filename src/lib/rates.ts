@@ -187,12 +187,13 @@ export const SOURCE_LINKS = [
   },
 ] as const;
 
-/** Default inputs matching account 002-1220-002 fixtures. */
+/** Default inputs for a new calculator session (not bill-fixture ground truth). */
 export const DEFAULT_INPUTS = {
   rateYear: 2025 as RateYear,
   meterSize: '5/8"' as MeterSize,
   waterUseCcf: 19,
-  winterSewerAvgCcf: 18.5,
+  /** Prefill = water use × 1.15 → nearest 0.5 (19 → 22). Fixtures still set 18.5 explicitly. */
+  winterSewerAvgCcf: 22,
   capitalAmount: 76,
   droughtAmount: 6.99,
 };

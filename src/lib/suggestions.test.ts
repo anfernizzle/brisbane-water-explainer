@@ -2,8 +2,18 @@ import { describe, expect, it } from "vitest";
 import {
   suggestCapitalBand,
   suggestDroughtTier,
+  estimateWinterSewerAvg,
   DROUGHT_MEDIAN_CCF,
 } from "./suggestions";
+
+describe("estimateWinterSewerAvg", () => {
+  it("uses water use × 1.15 rounded to nearest 0.5 ccf", () => {
+    expect(estimateWinterSewerAvg(19)).toBe(22);
+    expect(estimateWinterSewerAvg(16)).toBe(18.5);
+    expect(estimateWinterSewerAvg(0)).toBe(0);
+    expect(estimateWinterSewerAvg(10)).toBe(11.5);
+  });
+});
 
 describe("capital / drought auto suggestions from usage proxy", () => {
   it("maps capital bands per /513 2022 table", () => {
@@ -20,13 +30,10 @@ describe("capital / drought auto suggestions from usage proxy", () => {
   });
 
   it("matches fixture usages to $76 capital / $6.99 drought when band applies", () => {
-    // Bills with ≤19 ccf land in 11–19 capital band ($76) and above-median drought
     for (const usage of [16, 17, 19, 18.5]) {
       expect(suggestCapitalBand(usage).amount).toBe(76);
       expect(suggestDroughtTier(usage).amount).toBe(6.99);
     }
-    // 20–21 ccf → published capital table jumps to $100 (fixtures still billed $76 —
-    // spring-band lag / avg; override keeps fixture math in calculateBill tests)
     expect(suggestCapitalBand(20).amount).toBe(100);
     expect(suggestCapitalBand(21).amount).toBe(100);
     expect(suggestDroughtTier(20).amount).toBe(6.99);

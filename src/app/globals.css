@@ -484,6 +484,20 @@ button.card-header:hover {
   padding-right: var(--space-3);
 }
 
+.table-years th[scope="row"] {
+  white-space: nowrap;
+}
+
+.line-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: var(--space-2);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 .table-years thead th.label-col {
   padding-left: var(--space-4);
 }

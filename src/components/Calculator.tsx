@@ -12,7 +12,7 @@ import {
   Table,
   Tooltip,
 } from "react-bootstrap";
-import { LineChart } from "@mui/x-charts/LineChart";
+import { BarChart } from "@mui/x-charts/BarChart";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
@@ -34,17 +34,29 @@ import {
   METER_SIZES,
   RATE_YEAR_EFFECTIVE,
   RATE_YEARS,
+  SEWER_RATES,
   SOURCE_LINKS,
+  WATER_CONSUMPTION,
   type MeterSize,
   type RateYear,
 } from "@/lib/rates";
 import {
+  estimateWinterSewerAvg,
   suggestCapitalBand,
   suggestDroughtTier,
   type DroughtPresetId,
 } from "@/lib/suggestions";
 
 type ResultView = "bill" | "years";
+
+/** Material / Google palette for stacked bill segments */
+const LINE_COLORS = {
+  waterUse: "#4285F4",
+  waterSvc: "#8AB4F8",
+  sewer: "#34A853",
+  capital: "#FBBC04",
+  drought: "#EA4335",
+} as const;
 
 function InfoTip({ title }: { title: ReactNode }) {
   return (
@@ -80,9 +92,10 @@ export function Calculator() {
   const [waterUseCcf, setWaterUseCcf] = useState(
     String(DEFAULT_INPUTS.waterUseCcf),
   );
-  const [winterSewerAvgCcf, setWinterSewerAvgCcf] = useState(
-    String(DEFAULT_INPUTS.winterSewerAvgCcf),
+  const [winterSewerAvgCcf, setWinterSewerAvgCcf] = useState(() =>
+    String(estimateWinterSewerAvg(DEFAULT_INPUTS.waterUseCcf)),
   );
+  const [winterOverride, setWinterOverride] = useState(false);
 
   const [capitalOverride, setCapitalOverride] = useState(false);
   const [capitalPresetId, setCapitalPresetId] = useState("11-19");
@@ -104,6 +117,14 @@ export function Calculator() {
     () => suggestDroughtTier(usageNum),
     [usageNum],
   );
+  const waterRates = WATER_CONSUMPTION[rateYear];
+  const sewerRates = SEWER_RATES[rateYear];
+
+  useEffect(() => {
+    if (!winterOverride) {
+      setWinterSewerAvgCcf(String(estimateWinterSewerAvg(usageNum)));
+    }
+  }, [usageNum, winterOverride]);
 
   useEffect(() => {
     if (!capitalOverride) {
@@ -188,41 +209,49 @@ export function Calculator() {
 
   const chartDataset = projections.map((p) => ({
     year: String(p.rateYear),
-    total: p.result.total,
-    water: p.result.waterUse + p.result.waterService,
+    waterUse: p.result.waterUse,
+    waterSvc: p.result.waterService,
     sewer: p.result.sewer,
+    capital: p.result.capital,
+    drought: p.result.drought,
   }));
   const chartYearLabels = chartDataset.map((d) => d.year);
 
   const tableRows: Array<{
-    id: string;
+    id: keyof typeof LINE_COLORS | "total";
     label: string;
     values: number[];
+    color?: string;
     emphasize?: boolean;
   }> = [
     {
       id: "waterUse",
       label: "Water use",
+      color: LINE_COLORS.waterUse,
       values: projections.map((p) => p.result.waterUse),
     },
     {
       id: "waterSvc",
       label: "Water svc",
+      color: LINE_COLORS.waterSvc,
       values: projections.map((p) => p.result.waterService),
     },
     {
       id: "sewer",
       label: "Sewer",
+      color: LINE_COLORS.sewer,
       values: projections.map((p) => p.result.sewer),
     },
     {
       id: "capital",
       label: "Capital",
+      color: LINE_COLORS.capital,
       values: projections.map((p) => p.result.capital),
     },
     {
       id: "drought",
       label: "Drought",
+      color: LINE_COLORS.drought,
       values: projections.map((p) => p.result.drought),
     },
     {
@@ -233,7 +262,7 @@ export function Calculator() {
     },
   ];
 
-  const LABEL_COL_PX = 128;
+  const LABEL_COL_PX = 140;
 
   return (
     <div className="calc-stack">
@@ -320,7 +349,17 @@ export function Calculator() {
                 <Col xs={6} sm={3}>
                   <FieldLabel
                     label="Water use (ccf)"
-                    tip="Bimonthly usage in hundreds of cubic feet. Also used as a proxy to suggest capital band and drought tier when spring / yearly averages are unknown."
+                    tip={
+                      <span>
+                        <strong>CCF</strong> = hundred cubic feet (~748 gal),
+                        bimonthly. Also proxies capital/drought bands.{" "}
+                        {rateYear} water use: {formatMoney(waterRates.tier1)}
+                        /ccf (units 2–20), {formatMoney(waterRates.tier2)}/ccf
+                        (over 20). Winter sewer:{" "}
+                        {formatMoney(sewerRates.variable)}/ccf of winter avg (+
+                        fixed {formatMoney(sewerRates.fixed)}).
+                      </span>
+                    }
                   />
                   <Form.Control
                     type="number"
@@ -334,7 +373,15 @@ export function Calculator() {
                 <Col xs={6} sm={3}>
                   <FieldLabel
                     label="Winter sewer avg"
-                    tip="Mid-October → mid-February average. Half-units allowed. Pre-filled 18.5 from sample bills."
+                    tip={
+                      <span>
+                        Mid-Oct → mid-Feb average that{" "}
+                        <strong>directly sets the sewer charge</strong> (
+                        {formatMoney(sewerRates.variable)}/ccf in {rateYear} +
+                        fixed). Default is water use × 1.15 (nearest 0.5) — an
+                        estimate; check your bill and correct it.
+                      </span>
+                    }
                   />
                   <Form.Control
                     type="number"
@@ -342,7 +389,10 @@ export function Calculator() {
                     step={0.5}
                     value={winterSewerAvgCcf}
                     aria-label="Winter sewer average ccf"
-                    onChange={(e) => setWinterSewerAvgCcf(e.target.value)}
+                    onChange={(e) => {
+                      setWinterOverride(true);
+                      setWinterSewerAvgCcf(e.target.value);
+                    }}
                   />
                 </Col>
                 <Col xs={12} sm={6}>
@@ -375,7 +425,6 @@ export function Calculator() {
                     {CAPITAL_PRESETS.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.label}
-                        {p.id === capitalSuggested.id ? " · suggested" : ""}
                       </option>
                     ))}
                   </Form.Select>
@@ -410,7 +459,6 @@ export function Calculator() {
                     {DROUGHT_PRESETS.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.label}
-                        {p.id === droughtSuggested.id ? " · suggested" : ""}
                       </option>
                     ))}
                   </Form.Select>
@@ -524,13 +572,13 @@ export function Calculator() {
               held at current selection.
             </p>
             <div className="chart-glass">
-              <LineChart
+              <BarChart
                 dataset={chartDataset}
                 xAxis={[
                   {
                     dataKey: "year",
                     scaleType: "band",
-                    categoryGapRatio: 0.2,
+                    categoryGapRatio: 0.35,
                     tickPlacement: "middle",
                     tickLabelPlacement: "middle",
                     tickLabelStyle: {
@@ -555,29 +603,42 @@ export function Calculator() {
                 ]}
                 series={[
                   {
-                    dataKey: "total",
-                    label: "Total",
-                    color: "#111111",
-                    curve: "linear",
-                    showMark: true,
+                    dataKey: "waterUse",
+                    label: "Water use",
+                    stack: "bill",
+                    color: LINE_COLORS.waterUse,
                     valueFormatter: (v) =>
                       v == null ? "" : formatMoney(Number(v)),
                   },
                   {
-                    dataKey: "water",
-                    label: "Water (use+svc)",
-                    color: "#1a73e8",
-                    curve: "linear",
-                    showMark: true,
+                    dataKey: "waterSvc",
+                    label: "Water svc",
+                    stack: "bill",
+                    color: LINE_COLORS.waterSvc,
                     valueFormatter: (v) =>
                       v == null ? "" : formatMoney(Number(v)),
                   },
                   {
                     dataKey: "sewer",
                     label: "Sewer",
-                    color: "#555555",
-                    curve: "linear",
-                    showMark: true,
+                    stack: "bill",
+                    color: LINE_COLORS.sewer,
+                    valueFormatter: (v) =>
+                      v == null ? "" : formatMoney(Number(v)),
+                  },
+                  {
+                    dataKey: "capital",
+                    label: "Capital",
+                    stack: "bill",
+                    color: LINE_COLORS.capital,
+                    valueFormatter: (v) =>
+                      v == null ? "" : formatMoney(Number(v)),
+                  },
+                  {
+                    dataKey: "drought",
+                    label: "Drought",
+                    stack: "bill",
+                    color: LINE_COLORS.drought,
                     valueFormatter: (v) =>
                       v == null ? "" : formatMoney(Number(v)),
                   },
@@ -585,7 +646,7 @@ export function Calculator() {
                 margin={{
                   left: 8,
                   right: 8,
-                  top: 36,
+                  top: 40,
                   bottom: 36,
                 }}
                 grid={{ horizontal: true }}
@@ -653,6 +714,13 @@ export function Calculator() {
                           fontFamily: "var(--font-display)",
                         }}
                       >
+                        {row.color ? (
+                          <span
+                            className="line-swatch"
+                            style={{ backgroundColor: row.color }}
+                            aria-hidden
+                          />
+                        ) : null}
                         {row.label}
                       </th>
                       {row.values.map((value, idx) => {
