@@ -788,7 +788,7 @@ button.card-header:hover {
 .savings-card__totals {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-5) var(--space-8);
+  gap: var(--space-4) clamp(var(--space-4), 4vw, var(--space-8));
   align-items: end;
   margin: 0 0 var(--space-5);
   width: 100%;
@@ -803,17 +803,22 @@ button.card-header:hover {
 
 .savings-card__total-amount {
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 7vw, 3.75rem);
+  /* Fluid so per bill + per year stay side-by-side on ~390px phones */
+  font-size: clamp(1.625rem, 7.2vw, 3.75rem);
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   color: #fff;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  max-width: 100%;
 }
 
 .savings-card__total-label {
-  font-size: 1.125rem;
+  font-size: clamp(0.875rem, 2.8vw, 1.125rem);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
 }
 
 .savings-card__total-hint {
@@ -895,13 +900,6 @@ button.card-header:hover {
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.55);
   max-width: none;
-}
-
-@media (max-width: 575.98px) {
-  .savings-card__totals {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
 }
 
 .disclaimer-alert {
