@@ -21,14 +21,17 @@
   --glass-bg-raised: rgba(255, 255, 255, 0.7);
   --glass-bg-header: rgba(255, 255, 255, 0.48);
   --glass-bg-deep: rgba(250, 250, 250, 0.68);
-  --glass-border: rgba(255, 255, 255, 0.7);
+  /* Anthony exact card surface (Walker Design) */
+  --glass-border: rgba(0, 0, 0, 0.25);
   --glass-border-ink: rgba(17, 17, 17, 0.14);
-  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   --glass-shadow:
-    var(--glass-highlight),
-    0 4px 6px rgba(17, 17, 17, 0.05),
-    0 14px 36px rgba(17, 17, 17, 0.16);
-  --glass-blur: blur(22px) saturate(1.35);
+    0 0 0 1px rgba(0, 0, 0, 0.0588235294),
+    0 1px 1px -0.5px rgba(0, 0, 0, 0.0588235294),
+    0 3px 3px -1.5px rgba(0, 0, 0, 0.0588235294),
+    0 6px 6px -3px rgba(0, 0, 0, 0.0588235294),
+    0 12px 12px -6px rgba(0, 0, 0, 0.0588235294),
+    0 24px 24px -12px rgba(0, 0, 0, 0.0588235294);
+  --glass-blur: blur(20px);
   --glass-amount: rgba(17, 17, 17, 0.84);
 
   --bs-body-bg: transparent;
@@ -103,10 +106,16 @@ a:hover {
   padding: 0.85rem 1rem;
   border-radius: 12px;
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.0588235294),
+    0 1px 1px -0.5px rgba(0, 0, 0, 0.0588235294),
+    0 3px 3px -1.5px rgba(0, 0, 0, 0.0588235294),
+    0 6px 6px -3px rgba(0, 0, 0, 0.0588235294),
+    0 12px 12px -6px rgba(0, 0, 0, 0.0588235294),
+    0 24px 24px -12px rgba(0, 0, 0, 0.0588235294);
 }
 
 .page__eyebrow {
@@ -176,25 +185,23 @@ a:hover {
   color: var(--ink-soft) !important;
 }
 
-/* Stacked dimensional frosted glass cards */
+/* Stacked frosted glass cards — Anthony exact surface */
 .card {
   --bs-card-bg: var(--glass-bg);
-  --bs-card-border-color: var(--glass-border-ink);
+  --bs-card-border-color: rgba(0, 0, 0, 0.25);
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 12px;
-  box-shadow: var(--glass-shadow);
-  overflow: hidden;
-}
-
-.card + .card {
-  /* Slight depth cue between stacked panels */
   box-shadow:
-    var(--glass-highlight),
-    0 6px 10px rgba(17, 17, 17, 0.05),
-    0 16px 40px rgba(17, 17, 17, 0.16);
+    0 0 0 1px rgba(0, 0, 0, 0.0588235294),
+    0 1px 1px -0.5px rgba(0, 0, 0, 0.0588235294),
+    0 3px 3px -1.5px rgba(0, 0, 0, 0.0588235294),
+    0 6px 6px -3px rgba(0, 0, 0, 0.0588235294),
+    0 12px 12px -6px rgba(0, 0, 0, 0.0588235294),
+    0 24px 24px -12px rgba(0, 0, 0, 0.0588235294);
+  overflow: hidden;
 }
 
 .card-header {
@@ -353,8 +360,16 @@ button.card-header:hover {
 .chart-glass {
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.72);
-  border: 1px solid var(--glass-border-ink);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.0588235294),
+    0 1px 1px -0.5px rgba(0, 0, 0, 0.0588235294),
+    0 3px 3px -1.5px rgba(0, 0, 0, 0.0588235294),
+    0 6px 6px -3px rgba(0, 0, 0, 0.0588235294),
+    0 12px 12px -6px rgba(0, 0, 0, 0.0588235294),
+    0 24px 24px -12px rgba(0, 0, 0, 0.0588235294);
   padding: 0.35rem 0.25rem 0.15rem;
 }
 
@@ -414,7 +429,7 @@ button.card-header:hover {
 .disclaimer-card {
   --bs-card-bg: rgba(255, 248, 251, 0.78);
   background: rgba(255, 248, 251, 0.78) !important;
-  border-color: rgba(238, 89, 145, 0.4) !important;
+  /* Same Anthony surface as other cards; pink stays in the frosted fill */
 }
 
 .field-tip .tooltip-inner {
