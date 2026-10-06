@@ -660,6 +660,18 @@ export function Calculator() {
                     direction: "horizontal",
                     position: { vertical: "top", horizontal: "center" },
                   },
+                  tooltip: {
+                    trigger: "axis",
+                    // Follow cursor; default axis anchor "chart" pinned tooltips oddly.
+                    anchor: "pointer",
+                    // Prefer above the cursor; Popper flips near edges.
+                    placement: "top",
+                    // Escape .card { overflow: hidden } so 2026/2027 hovers stay on-screen.
+                    container:
+                      typeof document !== "undefined"
+                        ? document.body
+                        : undefined,
+                  },
                 }}
                 sx={{
                   width: "100%",

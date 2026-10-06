@@ -455,6 +455,14 @@ button.card-header:hover {
   width: 100%;
   height: 300px;
   box-sizing: border-box;
+  position: relative;
+  overflow: visible;
+}
+
+/* Chart tooltips portal to body; keep them above glass cards */
+.MuiChartsTooltip-root {
+  z-index: 2000;
+  pointer-events: none;
 }
 
 .table-years {
