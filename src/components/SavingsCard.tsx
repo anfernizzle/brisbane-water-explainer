@@ -136,9 +136,10 @@ export function SavingsCard({ baseline }: Props) {
       <p className="savings-card__note">
         Winter sewer avg scales with usage similar to the relationship in bill
         inputs. Capital Project Charges &amp; Drought Contingency remain
-        unchanged with this slider. This estimate assumes consistent usage,
-        which is unlikely in practice — actual bills will vary. It&apos;s for
-        informational purposes only, not a hyper-accurate peek into the future.
+        unchanged with this slider. This estimate assumes consistent usage
+        across billing periods; actual usage and bills will vary. Figures are
+        for informational purposes only and should not be treated as a precise
+        forecast.
       </p>
     </section>
   );
