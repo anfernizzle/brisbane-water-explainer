@@ -3,7 +3,12 @@ import {
   suggestCapitalBand,
   suggestDroughtTier,
   estimateWinterSewerAvg,
+  estimateWaterUseFromWinter,
+  applyWaterUseChange,
+  applyWinterChange,
+  isUnsetUsageField,
   DROUGHT_MEDIAN_CCF,
+  type LinkedUsageWinter,
 } from "./suggestions";
 
 describe("estimateWinterSewerAvg", () => {
@@ -12,6 +17,70 @@ describe("estimateWinterSewerAvg", () => {
     expect(estimateWinterSewerAvg(16)).toBe(18.5);
     expect(estimateWinterSewerAvg(0)).toBe(0);
     expect(estimateWinterSewerAvg(10)).toBe(11.5);
+  });
+});
+
+describe("estimateWaterUseFromWinter", () => {
+  it("uses winter ÷ 1.15 rounded to nearest 0.5 ccf", () => {
+    expect(estimateWaterUseFromWinter(22)).toBe(19);
+    expect(estimateWaterUseFromWinter(18.5)).toBe(16);
+    expect(estimateWaterUseFromWinter(0)).toBe(0);
+  });
+});
+
+describe("linked water use ↔ winter sewer defaults", () => {
+  const linked: LinkedUsageWinter = {
+    waterUse: "19",
+    winterAvg: "22",
+    waterManual: false,
+    winterManual: false,
+  };
+
+  it("clear winter → change usage → winter refills", () => {
+    const cleared = applyWinterChange(linked, "");
+    expect(cleared.winterManual).toBe(false);
+    expect(isUnsetUsageField(cleared.winterAvg)).toBe(true);
+
+    const next = applyWaterUseChange(cleared, "16");
+    expect(next.waterManual).toBe(true);
+    expect(next.winterManual).toBe(false);
+    expect(next.winterAvg).toBe("18.5");
+  });
+
+  it("clear usage → set winter → usage refills", () => {
+    const cleared = applyWaterUseChange(linked, "");
+    expect(cleared.waterManual).toBe(false);
+    expect(isUnsetUsageField(cleared.waterUse)).toBe(true);
+
+    const next = applyWinterChange(cleared, "22");
+    expect(next.winterManual).toBe(true);
+    expect(next.waterManual).toBe(false);
+    expect(next.waterUse).toBe("19");
+  });
+
+  it("manual values stick when the other field changes", () => {
+    const waterManual = applyWaterUseChange(linked, "19");
+    const winterManual = applyWinterChange(waterManual, "18.5");
+    expect(winterManual.waterUse).toBe("19");
+    expect(winterManual.winterAvg).toBe("18.5");
+    expect(winterManual.waterManual).toBe(true);
+    expect(winterManual.winterManual).toBe(true);
+
+    const afterWater = applyWaterUseChange(winterManual, "21");
+    expect(afterWater.winterAvg).toBe("18.5");
+    expect(afterWater.waterUse).toBe("21");
+
+    const afterWinter = applyWinterChange(afterWater, "20");
+    expect(afterWinter.waterUse).toBe("21");
+    expect(afterWinter.winterAvg).toBe("20");
+  });
+
+  it("zeroing a field clears its manual flag", () => {
+    const manual = applyWinterChange(applyWaterUseChange(linked, "19"), "18.5");
+    const clearedWinter = applyWinterChange(manual, "0");
+    expect(clearedWinter.winterManual).toBe(false);
+    const refilled = applyWaterUseChange(clearedWinter, "19");
+    expect(refilled.winterAvg).toBe("22");
   });
 });
 

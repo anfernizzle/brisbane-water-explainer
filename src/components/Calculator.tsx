@@ -41,10 +41,13 @@ import {
   type RateYear,
 } from "@/lib/rates";
 import {
+  applyWaterUseChange,
+  applyWinterChange,
   estimateWinterSewerAvg,
   suggestCapitalBand,
   suggestDroughtTier,
   type DroughtPresetId,
+  type LinkedUsageWinter,
 } from "@/lib/suggestions";
 
 type ResultView = "bill" | "years";
@@ -89,13 +92,14 @@ export function Calculator() {
   const [meterSize, setMeterSize] = useState<MeterSize>(
     DEFAULT_INPUTS.meterSize,
   );
-  const [waterUseCcf, setWaterUseCcf] = useState(
-    String(DEFAULT_INPUTS.waterUseCcf),
-  );
-  const [winterSewerAvgCcf, setWinterSewerAvgCcf] = useState(() =>
-    String(estimateWinterSewerAvg(DEFAULT_INPUTS.waterUseCcf)),
-  );
-  const [winterOverride, setWinterOverride] = useState(false);
+  const [usageWinter, setUsageWinter] = useState<LinkedUsageWinter>(() => ({
+    waterUse: String(DEFAULT_INPUTS.waterUseCcf),
+    winterAvg: String(estimateWinterSewerAvg(DEFAULT_INPUTS.waterUseCcf)),
+    waterManual: false,
+    winterManual: false,
+  }));
+  const waterUseCcf = usageWinter.waterUse;
+  const winterSewerAvgCcf = usageWinter.winterAvg;
 
   const [capitalOverride, setCapitalOverride] = useState(false);
   const [capitalPresetId, setCapitalPresetId] = useState("11-19");
@@ -119,12 +123,6 @@ export function Calculator() {
   );
   const waterRates = WATER_CONSUMPTION[rateYear];
   const sewerRates = SEWER_RATES[rateYear];
-
-  useEffect(() => {
-    if (!winterOverride) {
-      setWinterSewerAvgCcf(String(estimateWinterSewerAvg(usageNum)));
-    }
-  }, [usageNum, winterOverride]);
 
   useEffect(() => {
     if (!capitalOverride) {
@@ -367,7 +365,11 @@ export function Calculator() {
                     step={1}
                     value={waterUseCcf}
                     aria-label="Water use ccf"
-                    onChange={(e) => setWaterUseCcf(e.target.value)}
+                    onChange={(e) =>
+                      setUsageWinter((s) =>
+                        applyWaterUseChange(s, e.target.value),
+                      )
+                    }
                   />
                 </Col>
                 <Col xs={6} sm={3}>
@@ -379,7 +381,8 @@ export function Calculator() {
                         <strong>directly sets the sewer charge</strong> (
                         {formatMoney(sewerRates.variable)}/ccf in {rateYear} +
                         fixed). Default is water use × 1.15 (nearest 0.5) — an
-                        estimate; check your bill and correct it.
+                        estimate; check your bill and correct it. Clear the
+                        field to let water use drive it again.
                       </span>
                     }
                   />
@@ -389,10 +392,11 @@ export function Calculator() {
                     step={0.5}
                     value={winterSewerAvgCcf}
                     aria-label="Winter sewer average ccf"
-                    onChange={(e) => {
-                      setWinterOverride(true);
-                      setWinterSewerAvgCcf(e.target.value);
-                    }}
+                    onChange={(e) =>
+                      setUsageWinter((s) =>
+                        applyWinterChange(s, e.target.value),
+                      )
+                    }
                   />
                 </Col>
                 <Col xs={12} sm={6}>

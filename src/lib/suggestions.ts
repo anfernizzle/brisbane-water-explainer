@@ -15,6 +15,78 @@ export function estimateWinterSewerAvg(waterUseCcf: number): number {
 }
 
 /**
+ * Inverse default: winter ÷ 1.15, rounded to nearest 0.5 ccf
+ * (same half-unit granularity as winter; bill water use is often whole but 0.5 is consistent).
+ */
+export function estimateWaterUseFromWinter(winterSewerAvgCcf: number): number {
+  const winter = Number.isFinite(winterSewerAvgCcf)
+    ? Math.max(0, winterSewerAvgCcf)
+    : 0;
+  return Math.round((winter / 1.15) * 2) / 2;
+}
+
+/** Empty or zeroed field — not a manual value; the other field may drive it. */
+export function isUnsetUsageField(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed === "") return true;
+  const n = Number(trimmed);
+  return Number.isFinite(n) && n === 0;
+}
+
+export type LinkedUsageWinter = {
+  waterUse: string;
+  winterAvg: string;
+  waterManual: boolean;
+  winterManual: boolean;
+};
+
+export function applyWaterUseChange(
+  state: LinkedUsageWinter,
+  nextWater: string,
+): LinkedUsageWinter {
+  if (isUnsetUsageField(nextWater)) {
+    return { ...state, waterUse: nextWater, waterManual: false };
+  }
+
+  const usage = Number(nextWater);
+  const next: LinkedUsageWinter = {
+    ...state,
+    waterUse: nextWater,
+    waterManual: true,
+  };
+
+  if (!state.winterManual || isUnsetUsageField(state.winterAvg)) {
+    next.winterAvg = String(estimateWinterSewerAvg(usage));
+    next.winterManual = false;
+  }
+
+  return next;
+}
+
+export function applyWinterChange(
+  state: LinkedUsageWinter,
+  nextWinter: string,
+): LinkedUsageWinter {
+  if (isUnsetUsageField(nextWinter)) {
+    return { ...state, winterAvg: nextWinter, winterManual: false };
+  }
+
+  const winter = Number(nextWinter);
+  const next: LinkedUsageWinter = {
+    ...state,
+    winterAvg: nextWinter,
+    winterManual: true,
+  };
+
+  if (!state.waterManual || isUnsetUsageField(state.waterUse)) {
+    next.waterUse = String(estimateWaterUseFromWinter(winter));
+    next.waterManual = false;
+  }
+
+  return next;
+}
+
+/**
  * Map bimonthly usage (ccf) → Capital Projects Charge band (2022 table).
  * Proxy: uses entered water-use when spring average is unknown.
  * Units are treated as whole ccf for banding (floored); 0 stays 0.
