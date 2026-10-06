@@ -59,7 +59,7 @@ export function SavingsCard({ baseline }: Props) {
         What could I save?
       </p>
 
-      <p className="savings-card__sentence">
+      <p className="savings-card__lead">
         If you used{" "}
         <strong className="savings-card__em">
           {formatCcf(scenario.simulatedWaterUse)} ccf
@@ -68,44 +68,11 @@ export function SavingsCard({ baseline }: Props) {
         <strong className="savings-card__em">
           {formatCcf(scenario.baselineWaterUse)}
         </strong>
-        … you&apos;d use about{" "}
-        <strong className="savings-card__em">
-          {formatPercentWhole(reductionPct)}%
-        </strong>{" "}
-        less water and save about…
-      </p>
-
-      <div className="savings-card__totals" aria-live="polite">
-        <div className="savings-card__total savings-card__total--bill">
-          <span className="savings-card__total-amount">
-            {formatMoney(perBill)}
-          </span>
-          <span className="savings-card__total-label">per bill</span>
-        </div>
-        <div className="savings-card__total savings-card__total--year">
-          <span className="savings-card__total-amount">
-            {formatMoney(perYear)}
-          </span>
-          <span className="savings-card__total-label">
-            per year <span className="savings-card__total-hint">(×6 bills)</span>
-          </span>
-        </div>
-      </div>
-
-      <p className="savings-card__breakdown">
-        That&apos;s{" "}
-        <strong className="savings-card__em">
-          {formatMoney(scenario.savings.waterUse)}
-        </strong>{" "}
-        savings on Water Use and{" "}
-        <strong className="savings-card__em">
-          {formatMoney(scenario.savings.sewer)}
-        </strong>{" "}
-        savings on Sewer Charges.
+        …
       </p>
 
       <div className="savings-card__slider-wrap">
-        <label className="savings-card__slider-label" htmlFor="savings-usage">
+        <label className="visually-hidden" htmlFor="savings-usage">
           Dial usage down
         </label>
         <input
@@ -129,10 +96,48 @@ export function SavingsCard({ baseline }: Props) {
         </div>
       </div>
 
+      <p className="savings-card__payoff-lead">
+        You&apos;d use about{" "}
+        <strong className="savings-card__em">
+          {formatPercentWhole(reductionPct)}%
+        </strong>{" "}
+        less water and save about…
+      </p>
+
+      <div className="savings-card__totals" aria-live="polite">
+        <div className="savings-card__total">
+          <span className="savings-card__total-amount">
+            {formatMoney(perBill)}
+          </span>
+          <span className="savings-card__total-label">per bill</span>
+        </div>
+        <div className="savings-card__total">
+          <span className="savings-card__total-amount">
+            {formatMoney(perYear)}
+          </span>
+          <span className="savings-card__total-label">
+            per year <span className="savings-card__total-hint">(×6 bills)</span>
+          </span>
+        </div>
+      </div>
+
+      <p className="savings-card__breakdown">
+        That&apos;s{" "}
+        <strong className="savings-card__em">
+          {formatMoney(scenario.savings.waterUse)}
+        </strong>{" "}
+        savings on Water Use and{" "}
+        <strong className="savings-card__em">
+          {formatMoney(scenario.savings.sewer)}
+        </strong>{" "}
+        savings on Sewer Charges each month.
+      </p>
+
       <p className="savings-card__note">
-        Winter sewer avg scales with usage (same link as Bill inputs). Capital
-        &amp; drought stay at your current selection — they don&apos;t change
-        with this slider.
+        Winter sewer avg scales with usage similar to the relationship in bill
+        inputs. Capital Project Charges &amp; Drought Contingency remain
+        unchanged with this slider. This is only an estimate for informational
+        purposes. Actual results may vary.
       </p>
     </section>
   );

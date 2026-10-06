@@ -692,13 +692,22 @@ button.card-header:hover {
   opacity: 0.85;
 }
 
-.savings-card__sentence {
-  margin: 0 0 var(--space-5);
+.savings-card__lead,
+.savings-card__payoff-lead {
+  margin: 0;
   font-size: clamp(1.25rem, 2.4vw, 1.5rem);
   font-weight: 500;
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.92);
   max-width: none;
+}
+
+.savings-card__lead {
+  margin-bottom: var(--space-5);
+}
+
+.savings-card__payoff-lead {
+  margin: 0 0 var(--space-5);
 }
 
 .savings-card__em {
@@ -726,19 +735,11 @@ button.card-header:hover {
 
 .savings-card__total-amount {
   font-family: var(--font-display);
+  font-size: clamp(2.75rem, 7vw, 3.75rem);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.02em;
   color: #fff;
-}
-
-.savings-card__total--bill .savings-card__total-amount {
-  font-size: clamp(2.75rem, 7vw, 3.75rem);
-}
-
-.savings-card__total--year .savings-card__total-amount {
-  font-size: clamp(2rem, 5vw, 2.75rem);
-  color: rgba(255, 255, 255, 0.92);
 }
 
 .savings-card__total-label {
@@ -754,7 +755,7 @@ button.card-header:hover {
 }
 
 .savings-card__breakdown {
-  margin: 0 0 var(--space-7);
+  margin: 0 0 var(--space-6);
   font-size: 1.125rem;
   font-weight: 500;
   line-height: 1.45;
@@ -765,15 +766,7 @@ button.card-header:hover {
 .savings-card__slider-wrap {
   width: 100%;
   max-width: none;
-  margin: 0 0 var(--space-4);
-}
-
-.savings-card__slider-label {
-  display: block;
-  margin-bottom: var(--space-2);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.65);
+  margin: 0 0 var(--space-6);
 }
 
 .savings-card__slider {
