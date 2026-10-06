@@ -523,17 +523,22 @@ export function Calculator() {
               Same inputs under approved maxima through 2027. Capital & drought
               held at current selection.
             </p>
-            <div className="chart-glass" style={{ height: 260, width: "100%" }}>
+            <div className="chart-glass">
               <LineChart
                 dataset={chartDataset}
                 xAxis={[
                   {
                     dataKey: "year",
                     scaleType: "band",
-                    categoryGapRatio: 0,
+                    categoryGapRatio: 0.2,
                     tickPlacement: "middle",
-                    tickLabelInterval: () => false,
-                    disableTicks: true,
+                    tickLabelPlacement: "middle",
+                    tickLabelStyle: {
+                      fontSize: 13,
+                      fontWeight: 700,
+                      fill: "#111111",
+                    },
+                    valueFormatter: (value: string | number) => String(value),
                   },
                 ]}
                 yAxis={[
@@ -578,10 +583,10 @@ export function Calculator() {
                   },
                 ]}
                 margin={{
-                  left: LABEL_COL_PX,
-                  right: 0,
+                  left: 8,
+                  right: 8,
                   top: 36,
-                  bottom: 8,
+                  bottom: 36,
                 }}
                 grid={{ horizontal: true }}
                 slotProps={{
@@ -591,8 +596,11 @@ export function Calculator() {
                   },
                 }}
                 sx={{
+                  width: "100%",
+                  height: "100%",
                   "& .MuiChartsAxis-directionX .MuiChartsAxis-tickLabel": {
-                    display: "none",
+                    fill: "#111111",
+                    fontWeight: 700,
                   },
                   "& .MuiChartsGrid-line": {
                     stroke: "rgba(17, 17, 17, 0.12)",
