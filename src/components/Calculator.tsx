@@ -673,10 +673,8 @@ export function Calculator() {
                 </tbody>
               </Table>
             </div>
-            <p className="footnote mb-0">
-              * 2027 is the last City-approved maximum schedule. Year labels
-              appear once in the table header; chart points are centered above
-              each year column.
+            <p className="years-footnote">
+              * 2027 is the last City-approved maximum schedule.
             </p>
           </Card.Body>
         )}

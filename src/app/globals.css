@@ -436,6 +436,13 @@ button.card-header:hover {
   padding-bottom: var(--space-2);
 }
 
+.years-footnote {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  margin: 0;
+  padding-bottom: 0.65rem;
+}
+
 .chart-glass {
   border-radius: 12px;
   background: var(--glass-bg);
