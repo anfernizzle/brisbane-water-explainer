@@ -7,6 +7,7 @@ import {
   defaultSimulatedUsage,
   formatCcf,
   formatPercentWhole,
+  formatPositiveSavingsSentence,
   scaleWinterWithUsage,
   waterReductionPercent,
 } from "./savings";
@@ -55,21 +56,24 @@ describe("clampSimulatedUsage / defaultSimulatedUsage", () => {
 });
 
 describe("buildSavingsScenario", () => {
-  it("holds capital and drought at baseline amounts", () => {
+  it("re-suggests capital and drought from simulated usage (19 → 10)", () => {
     const scenario = buildSavingsScenario(baseInputs, 10);
-    expect(scenario.simulated.capital).toBe(76);
-    expect(scenario.simulated.drought).toBe(6.99);
-    expect(scenario.savings.capital).toBe(0);
-    expect(scenario.savings.drought).toBe(0);
+    // 11–19 band $76 → 10 units $70; above-median $6.99 → below $2.32
+    expect(scenario.simulated.capital).toBe(70);
+    expect(scenario.simulated.drought).toBe(2.32);
+    expect(scenario.savings.capital).toBe(6);
+    expect(scenario.savings.drought).toBe(4.67);
   });
 
-  it("saves on water use and sewer when usage drops; total matches sum", () => {
+  it("saves on water use, sewer, capital, and drought when usage drops", () => {
     const scenario = buildSavingsScenario(baseInputs, 10);
     expect(scenario.simulatedWaterUse).toBe(10);
     expect(scenario.simulatedWinter).toBe(11.5);
     expect(scenario.savings.waterUse).toBeGreaterThan(0);
     expect(scenario.savings.sewer).toBeGreaterThan(0);
     expect(scenario.savings.waterService).toBe(0);
+    expect(scenario.savings.capital).toBe(6);
+    expect(scenario.savings.drought).toBe(4.67);
     const sum =
       scenario.savings.waterUse +
       scenario.savings.waterService +
@@ -83,11 +87,20 @@ describe("buildSavingsScenario", () => {
     );
   });
 
+  it("keeps capital/drought savings at 0 when simulated stays in same bands", () => {
+    // 15 and 19 both map to 11–19 capital and above-median drought
+    const scenario = buildSavingsScenario(baseInputs, 15);
+    expect(scenario.savings.capital).toBe(0);
+    expect(scenario.savings.drought).toBe(0);
+  });
+
   it("reports zero savings when simulated equals baseline", () => {
     const scenario = buildSavingsScenario(baseInputs, 19);
     expect(scenario.savings.total).toBe(0);
     expect(scenario.savings.waterUse).toBe(0);
     expect(scenario.savings.sewer).toBe(0);
+    expect(scenario.savings.capital).toBe(0);
+    expect(scenario.savings.drought).toBe(0);
   });
 
   it("does not mutate conceptual baseline when simulating zero usage", () => {
@@ -95,6 +108,27 @@ describe("buildSavingsScenario", () => {
     expect(scenario.baselineWaterUse).toBe(19);
     expect(scenario.simulatedWaterUse).toBe(0);
     expect(scenario.savings.total).toBeGreaterThan(0);
+  });
+});
+
+describe("formatPositiveSavingsSentence", () => {
+  it("includes capital and drought only when savings > 0 (19 → 10)", () => {
+    const scenario = buildSavingsScenario(baseInputs, 10);
+    const sentence = formatPositiveSavingsSentence(scenario.savings);
+    expect(sentence).toContain("Water Use");
+    expect(sentence).toContain("Sewer Charges");
+    expect(sentence).toContain("$6.00 savings on Capital Project Charges");
+    expect(sentence).toContain("$4.67 savings on Drought Contingency");
+    expect(sentence.endsWith("per bill.")).toBe(true);
+  });
+
+  it("omits capital/drought when those savings are $0", () => {
+    const scenario = buildSavingsScenario(baseInputs, 15);
+    const sentence = formatPositiveSavingsSentence(scenario.savings);
+    expect(sentence).toContain("Water Use");
+    expect(sentence).toContain("Sewer Charges");
+    expect(sentence).not.toContain("Capital");
+    expect(sentence).not.toContain("Drought");
   });
 });
 

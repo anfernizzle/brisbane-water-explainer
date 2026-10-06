@@ -1,4 +1,5 @@
-import { calculateBill, roundCents, type BillInputs, type BillResult } from "./calculate";
+import { calculateBill, formatMoney, roundCents, type BillInputs, type BillResult } from "./calculate";
+import { suggestCapitalBand, suggestDroughtTier } from "./suggestions";
 
 /** Slider floor for the what-if water-use scenario (ccf). */
 export const SAVINGS_USAGE_FLOOR = 0;
@@ -64,8 +65,9 @@ export function defaultSimulatedUsage(baselineWater: number): number {
 }
 
 /**
- * What-if bill vs current inputs. Capital & drought amounts are held from
- * the baseline inputs (not re-suggested from lower usage).
+ * What-if bill vs current inputs. Water use + winter scale together; capital
+ * and drought are re-suggested from simulated usage (same band/tier helpers
+ * as Bill inputs).
  */
 export function buildSavingsScenario(
   baselineInputs: BillInputs,
@@ -80,12 +82,16 @@ export function buildSavingsScenario(
     simulated,
   );
 
+  const capitalAmount = suggestCapitalBand(simulated).amount;
+  const droughtAmount = suggestDroughtTier(simulated).amount;
+
   const baseline = calculateBill(baselineInputs);
   const simulatedResult = calculateBill({
     ...baselineInputs,
     waterUseCcf: simulated,
     winterSewerAvgCcf: simulatedWinter,
-    // capitalAmount / droughtAmount intentionally unchanged
+    capitalAmount,
+    droughtAmount,
   });
 
   const savings: LineSavings = {
@@ -108,6 +114,38 @@ export function buildSavingsScenario(
     simulated: simulatedResult,
     savings,
   };
+}
+
+const BREAKDOWN_LINES: Array<{
+  key: keyof Omit<LineSavings, "total" | "waterService">;
+  label: string;
+}> = [
+  { key: "waterUse", label: "Water Use" },
+  { key: "sewer", label: "Sewer Charges" },
+  { key: "capital", label: "Capital Project Charges" },
+  { key: "drought", label: "Drought Contingency" },
+];
+
+/**
+ * Build the “That’s $… on Water Use and …” sentence. Only includes lines with
+ * savings > $0 (omits zero capital/drought when bands don’t change).
+ */
+export function formatPositiveSavingsSentence(savings: LineSavings): string {
+  const parts = BREAKDOWN_LINES.filter(({ key }) => savings[key] > 0).map(
+    ({ key, label }) => `${formatMoney(savings[key])} savings on ${label}`,
+  );
+  if (parts.length === 0) {
+    return "No line-item savings at this usage level.";
+  }
+  if (parts.length === 1) {
+    return `That's ${parts[0]} per bill.`;
+  }
+  if (parts.length === 2) {
+    return `That's ${parts[0]} and ${parts[1]} per bill.`;
+  }
+  const last = parts[parts.length - 1];
+  const head = parts.slice(0, -1).join(", ");
+  return `That's ${head}, and ${last} per bill.`;
 }
 
 export function formatCcf(n: number): string {

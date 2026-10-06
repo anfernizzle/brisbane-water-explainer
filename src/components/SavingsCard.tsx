@@ -10,6 +10,7 @@ import {
   defaultSimulatedUsage,
   formatCcf,
   formatPercentWhole,
+  formatPositiveSavingsSentence,
   SAVINGS_USAGE_FLOOR,
   waterReductionPercent,
 } from "@/lib/savings";
@@ -48,6 +49,7 @@ export function SavingsCard({ baseline }: Props) {
   );
   const perBill = scenario.savings.total;
   const perYear = annualizeSavings(perBill);
+  const breakdown = formatPositiveSavingsSentence(scenario.savings);
 
   const max = baselineWater;
   const sliderDisabled = max <= SAVINGS_USAGE_FLOOR;
@@ -68,8 +70,7 @@ export function SavingsCard({ baseline }: Props) {
         <strong className="savings-card__em">
           {formatCcf(scenario.baselineWaterUse)}
         </strong>{" "}
-        in{" "}
-        <strong className="savings-card__em">{baseline.rateYear}</strong>
+        in <strong className="savings-card__em">{baseline.rateYear}</strong>
         …
       </p>
 
@@ -123,27 +124,17 @@ export function SavingsCard({ baseline }: Props) {
         </div>
       </div>
 
-      <p className="savings-card__breakdown">
-        That&apos;s{" "}
-        <strong className="savings-card__em">
-          {formatMoney(scenario.savings.waterUse)}
-        </strong>{" "}
-        savings on Water Use and{" "}
-        <strong className="savings-card__em">
-          {formatMoney(scenario.savings.sewer)}
-        </strong>{" "}
-        savings on Sewer Charges per bill.
-      </p>
+      <p className="savings-card__breakdown">{breakdown}</p>
 
       <p className="savings-card__note">
         Winter sewer avg scales with usage similar to the relationship in bill
-        inputs. Capital Project Charges &amp; Drought Contingency remain
-        unchanged with this slider. This estimate assumes consistent usage
-        across billing periods for the noted year&apos;s rate structure; actual
-        usage and bills will vary. Billing rates go into effect starting June 15
-        of that year until June 15 of the following calendar year. Figures are
-        for informational purposes only and should not be treated as a precise
-        forecast.
+        inputs. Capital Project Charges and Drought Contingency are re-estimated
+        from the simulated usage using the same bands and median tiers as Bill
+        inputs. This estimate assumes consistent usage across billing periods
+        for the noted year&apos;s rate structure; actual usage and bills will
+        vary. Billing rates go into effect starting June 15 of that year until
+        June 15 of the following calendar year. Figures are for informational
+        purposes only and should not be treated as a precise forecast.
       </p>
     </section>
   );
