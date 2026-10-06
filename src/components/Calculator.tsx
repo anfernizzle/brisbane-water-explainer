@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Alert,
-  ButtonGroup,
   Card,
   Col,
   Collapse,
@@ -11,7 +10,6 @@ import {
   OverlayTrigger,
   Row,
   Table,
-  ToggleButton,
   Tooltip,
 } from "react-bootstrap";
 import { LineChart } from "@mui/x-charts/LineChart";
@@ -244,12 +242,12 @@ export function Calculator() {
         <button
           ref={inputsAnchorRef}
           type="button"
-          className="card-header d-flex align-items-center gap-2 w-100 text-start border-0"
+          className="card-header section-header d-flex align-items-center gap-2 w-100 text-start border-0"
           onClick={toggleInputs}
           aria-expanded={inputsOpen}
           aria-controls="bill-inputs-panel"
         >
-          <span>Bill inputs</span>
+          <span className="section-title">Bill inputs</span>
           {!inputsOpen && (
             <span className="inputs-summary flex-grow-1">
               <span className="inputs-summary__item">
@@ -272,7 +270,7 @@ export function Calculator() {
           <span className="ms-auto">
             <FontAwesomeIcon
               icon={inputsOpen ? faCaretUp : faCaretDown}
-              style={{ fontSize: 16, color: "var(--accent-ink)" }}
+              className="collapse-caret"
               aria-hidden
             />
           </span>
@@ -425,32 +423,40 @@ export function Calculator() {
 
       {/* ESTIMATED BILL */}
       <Card>
-        <Card.Header className="d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <span>Estimated bill</span>
-          <ButtonGroup size="sm">
-            <ToggleButton
-              id="view-bill"
-              type="radio"
-              variant={resultView === "bill" ? "primary" : "outline-primary"}
-              name="resultView"
-              value="bill"
-              checked={resultView === "bill"}
-              onChange={() => setResultView("bill")}
+        <Card.Header className="section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <span className="section-title">Estimated bill</span>
+          <div
+            className="segmented-toggle"
+            data-view={resultView}
+            role="radiogroup"
+            aria-label="Bill result view"
+          >
+            <span className="segmented-toggle__thumb" aria-hidden />
+            <button
+              type="button"
+              role="radio"
+              aria-checked={resultView === "bill"}
+              className={`segmented-toggle__option${
+                resultView === "bill" ? " segmented-toggle__option--active" : ""
+              }`}
+              onClick={() => setResultView("bill")}
             >
               {rateYear} detail
-            </ToggleButton>
-            <ToggleButton
-              id="view-years"
-              type="radio"
-              variant={resultView === "years" ? "primary" : "outline-primary"}
-              name="resultView"
-              value="years"
-              checked={resultView === "years"}
-              onChange={() => setResultView("years")}
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={resultView === "years"}
+              className={`segmented-toggle__option${
+                resultView === "years"
+                  ? " segmented-toggle__option--active"
+                  : ""
+              }`}
+              onClick={() => setResultView("years")}
             >
               All years
-            </ToggleButton>
-          </ButtonGroup>
+            </button>
+          </div>
         </Card.Header>
 
         {resultView === "bill" ? (
@@ -468,11 +474,8 @@ export function Calculator() {
                     >
                       <FontAwesomeIcon
                         icon={isOpen ? faChevronDown : faChevronRight}
-                        style={{
-                          fontSize: 12,
-                          color: "var(--ink-faint)",
-                          width: 12,
-                        }}
+                        className="bill-line__chevron"
+                        aria-hidden
                       />
                       <span className="bill-line__label">{line.label}</span>
                       <span className="bill-line__amount money">
@@ -485,52 +488,35 @@ export function Calculator() {
                   </div>
                 );
               })}
-            </Card.Body>
-            <div className="amount-due">
-              <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-baseline gap-2">
-                <div>
-                  <div className="amount-due__label">
-                    Amount due · {rateYear}
-                  </div>
-                  <button
-                    type="button"
-                    className="amount-due__total"
-                    aria-expanded={!!expanded.total}
-                    onClick={() => toggleLine("total")}
-                  >
-                    {formatMoney(totalLine.amount)}
-                  </button>
-                </div>
-                <OverlayTrigger
-                  placement="top"
-                  overlay={
-                    <Tooltip>
-                      Click the total or any line for the formula. Prop 218
-                      maxima; over-20 uses published table.
-                    </Tooltip>
-                  }
+              <div>
+                <button
+                  type="button"
+                  className="bill-line bill-line--total"
+                  aria-expanded={!!expanded.total}
+                  onClick={() => toggleLine("total")}
                 >
-                  <span className="amount-due__hint">
-                    Prop 218 maxima · over-20 published table{" "}
-                    <FontAwesomeIcon
-                      icon={faCircleInfo}
-                      style={{ fontSize: 12 }}
-                    />
+                  <FontAwesomeIcon
+                    icon={
+                      expanded.total ? faChevronDown : faChevronRight
+                    }
+                    className="bill-line__chevron"
+                    aria-hidden
+                  />
+                  <span className="bill-line__label">
+                    Amount due – {rateYear}
                   </span>
-                </OverlayTrigger>
+                  <span className="bill-line__amount money">
+                    {formatMoney(totalLine.amount)}
+                  </span>
+                </button>
+                <Collapse in={!!expanded.total}>
+                  <p className="bill-line__formula">{totalLine.formula}</p>
+                </Collapse>
               </div>
-              <Collapse in={!!expanded.total}>
-                <p
-                  className="mb-0 mt-2 footnote"
-                  style={{
-                    fontFamily: "var(--font-code)",
-                    color: "rgba(255,255,255,0.9)",
-                  }}
-                >
-                  {totalLine.formula}
-                </p>
-              </Collapse>
-            </div>
+              <p className="bill-detail-footnote mb-0">
+                Tap any line to see how it&apos;s calculated.
+              </p>
+            </Card.Body>
           </>
         ) : (
           <Card.Body className="years-panel">
