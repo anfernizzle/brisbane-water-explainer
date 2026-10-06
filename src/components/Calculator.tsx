@@ -485,38 +485,58 @@ export function Calculator() {
         <Card.Header className="section-header estimated-header">
           <div className="estimated-header__row">
             <span className="section-title">Estimated bill</span>
-            <div
-              className="segmented-toggle"
-              data-view={resultView}
-              role="radiogroup"
-              aria-label="Bill result view"
-            >
-              <span className="segmented-toggle__thumb" aria-hidden />
+            <div className="estimated-header__controls">
+              <div
+                className="segmented-toggle"
+                data-view={resultView}
+                role="radiogroup"
+                aria-label="Bill result view"
+              >
+                <span className="segmented-toggle__thumb" aria-hidden />
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={resultView === "bill"}
+                  className={`segmented-toggle__option${
+                    resultView === "bill"
+                      ? " segmented-toggle__option--active"
+                      : ""
+                  }`}
+                  onClick={() => setResultView("bill")}
+                >
+                  {rateYear} detail
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={resultView === "years"}
+                  className={`segmented-toggle__option${
+                    resultView === "years"
+                      ? " segmented-toggle__option--active"
+                      : ""
+                  }`}
+                  onClick={() => setResultView("years")}
+                >
+                  All years
+                </button>
+              </div>
               <button
                 type="button"
-                role="radio"
-                aria-checked={resultView === "bill"}
-                className={`segmented-toggle__option${
-                  resultView === "bill"
-                    ? " segmented-toggle__option--active"
-                    : ""
-                }`}
-                onClick={() => setResultView("bill")}
+                className="bill-collapse-btn"
+                onClick={toggleLines}
+                aria-expanded={linesOpen}
+                aria-controls="estimated-bill-panel"
+                aria-label={
+                  linesOpen
+                    ? "Collapse estimated bill details"
+                    : "Expand estimated bill details"
+                }
               >
-                {rateYear} detail
-              </button>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={resultView === "years"}
-                className={`segmented-toggle__option${
-                  resultView === "years"
-                    ? " segmented-toggle__option--active"
-                    : ""
-                }`}
-                onClick={() => setResultView("years")}
-              >
-                All years
+                <FontAwesomeIcon
+                  icon={linesOpen ? faCaretUp : faCaretDown}
+                  className="collapse-caret"
+                  aria-hidden
+                />
               </button>
             </div>
           </div>
@@ -527,266 +547,252 @@ export function Calculator() {
           )}
         </Card.Header>
 
-        {resultView === "bill" ? (
-          <>
-            <button
-              type="button"
-              className="bill-lines-toggle"
-              onClick={toggleLines}
-              aria-expanded={linesOpen}
-              aria-controls="bill-lines-panel"
-            >
-              <span className="bill-lines-toggle__label">Line items</span>
-              <FontAwesomeIcon
-                icon={linesOpen ? faCaretUp : faCaretDown}
-                className="collapse-caret"
-                aria-hidden
-              />
-            </button>
-            <Collapse in={linesOpen}>
-              <div id="bill-lines-panel">
-                <Card.Body className="py-2 px-2">
-                  {lineItems.map((line) => {
-                    const isOpen = !!expanded[line.id];
-                    return (
-                      <div key={line.id}>
-                        <button
-                          type="button"
-                          className="bill-line"
-                          aria-expanded={isOpen}
-                          onClick={() => toggleLine(line.id)}
-                        >
-                          <FontAwesomeIcon
-                            icon={isOpen ? faChevronDown : faChevronRight}
-                            className="bill-line__chevron"
-                            aria-hidden
-                          />
-                          <span className="bill-line__label">{line.label}</span>
-                          <span className="bill-line__amount money">
-                            {formatMoney(line.amount)}
-                          </span>
-                        </button>
-                        <Collapse in={isOpen}>
-                          <p className="bill-line__formula">{line.formula}</p>
-                        </Collapse>
-                      </div>
-                    );
-                  })}
-                </Card.Body>
-              </div>
-            </Collapse>
-            <div className="amount-due">
-              <button
-                type="button"
-                className="amount-due__row"
-                aria-expanded={!!expanded.total}
-                onClick={() => toggleLine("total")}
-              >
-                <span className="amount-due__label">
-                  Amount due – {rateYear}
-                </span>
-                <span className="amount-due__total money">
-                  {formatMoney(totalLine.amount)}
-                </span>
-              </button>
-              <Collapse in={!!expanded.total}>
-                <p className="amount-due__formula mb-0">{totalLine.formula}</p>
-              </Collapse>
-            </div>
-          </>
-        ) : (
-          <Card.Body className="years-panel">
-            <p className="text-secondary mb-3">
-              Same inputs under each rate year through 2027. Capital & drought
-              held at current selection.
-            </p>
-            <div className="chart-glass">
-              <BarChart
-                dataset={chartDataset}
-                xAxis={[
-                  {
-                    dataKey: "year",
-                    scaleType: "band",
-                    categoryGapRatio: 0.35,
-                    tickPlacement: "middle",
-                    tickLabelPlacement: "middle",
-                    tickLabelStyle: {
-                      fontSize: 13,
-                      fontWeight: 700,
-                      fill: "#111111",
-                    },
-                    valueFormatter: (value: string | number) => String(value),
-                  },
-                ]}
-                yAxis={[
-                  {
-                    width: 56,
-                    tickLabelStyle: { fontSize: 12, fill: "#111111" },
-                    valueFormatter: (value: number | null) => {
-                      if (value == null || Number.isNaN(Number(value))) {
-                        return "";
-                      }
-                      return `$${Math.round(Number(value)).toLocaleString("en-US")}`;
-                    },
-                  },
-                ]}
-                series={[
-                  {
-                    dataKey: "waterUse",
-                    label: "Water use",
-                    stack: "bill",
-                    color: LINE_COLORS.waterUse,
-                    valueFormatter: (v) =>
-                      v == null ? "" : formatMoney(Number(v)),
-                  },
-                  {
-                    dataKey: "waterSvc",
-                    label: "Water svc",
-                    stack: "bill",
-                    color: LINE_COLORS.waterSvc,
-                    valueFormatter: (v) =>
-                      v == null ? "" : formatMoney(Number(v)),
-                  },
-                  {
-                    dataKey: "sewer",
-                    label: "Sewer",
-                    stack: "bill",
-                    color: LINE_COLORS.sewer,
-                    valueFormatter: (v) =>
-                      v == null ? "" : formatMoney(Number(v)),
-                  },
-                  {
-                    dataKey: "capital",
-                    label: "Capital",
-                    stack: "bill",
-                    color: LINE_COLORS.capital,
-                    valueFormatter: (v) =>
-                      v == null ? "" : formatMoney(Number(v)),
-                  },
-                  {
-                    dataKey: "drought",
-                    label: "Drought",
-                    stack: "bill",
-                    color: LINE_COLORS.drought,
-                    valueFormatter: (v) =>
-                      v == null ? "" : formatMoney(Number(v)),
-                  },
-                ]}
-                margin={{
-                  left: 8,
-                  right: 8,
-                  top: 40,
-                  bottom: 36,
-                }}
-                grid={{ horizontal: true }}
-                slotProps={{
-                  legend: {
-                    direction: "horizontal",
-                    position: { vertical: "top", horizontal: "center" },
-                  },
-                  tooltip: {
-                    trigger: "axis",
-                    // Follow cursor; default axis anchor "chart" pinned tooltips oddly.
-                    anchor: "pointer",
-                    // Prefer above the cursor; Popper flips near edges.
-                    placement: "top",
-                    // Escape .card { overflow: hidden } so 2026/2027 hovers stay on-screen.
-                    container:
-                      typeof document !== "undefined"
-                        ? document.body
-                        : undefined,
-                  },
-                }}
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                  "& .MuiChartsAxis-directionX .MuiChartsAxis-tickLabel": {
-                    fill: "#111111",
-                    fontWeight: 700,
-                  },
-                  "& .MuiChartsGrid-line": {
-                    stroke: "rgba(17, 17, 17, 0.12)",
-                  },
-                  "& .MuiChartsLegend-series text": {
-                    fill: "#111111",
-                  },
-                }}
-              />
-            </div>
+        <Collapse in={linesOpen}>
+          <div id="estimated-bill-panel">
+            {resultView === "bill" ? (
+              <Card.Body className="py-2 px-2">
+                {lineItems.map((line) => {
+                  const isOpen = !!expanded[line.id];
+                  return (
+                    <div key={line.id}>
+                      <button
+                        type="button"
+                        className="bill-line"
+                        aria-expanded={isOpen}
+                        onClick={() => toggleLine(line.id)}
+                      >
+                        <FontAwesomeIcon
+                          icon={isOpen ? faChevronDown : faChevronRight}
+                          className="bill-line__chevron"
+                          aria-hidden
+                        />
+                        <span className="bill-line__label">{line.label}</span>
+                        <span className="bill-line__amount money">
+                          {formatMoney(line.amount)}
+                        </span>
+                      </button>
+                      <Collapse in={isOpen}>
+                        <p className="bill-line__formula">{line.formula}</p>
+                      </Collapse>
+                    </div>
+                  );
+                })}
+              </Card.Body>
+            ) : (
+              <Card.Body className="years-panel">
+                <p className="text-secondary mb-3">
+                  Same inputs under each rate year through 2027. Capital &
+                  drought held at current selection.
+                </p>
+                <div className="chart-glass">
+                  <BarChart
+                    dataset={chartDataset}
+                    xAxis={[
+                      {
+                        dataKey: "year",
+                        scaleType: "band",
+                        categoryGapRatio: 0.35,
+                        tickPlacement: "middle",
+                        tickLabelPlacement: "middle",
+                        tickLabelStyle: {
+                          fontSize: 13,
+                          fontWeight: 700,
+                          fill: "#111111",
+                        },
+                        valueFormatter: (value: string | number) =>
+                          String(value),
+                      },
+                    ]}
+                    yAxis={[
+                      {
+                        width: 56,
+                        tickLabelStyle: { fontSize: 12, fill: "#111111" },
+                        valueFormatter: (value: number | null) => {
+                          if (value == null || Number.isNaN(Number(value))) {
+                            return "";
+                          }
+                          return `$${Math.round(Number(value)).toLocaleString("en-US")}`;
+                        },
+                      },
+                    ]}
+                    series={[
+                      {
+                        dataKey: "waterUse",
+                        label: "Water use",
+                        stack: "bill",
+                        color: LINE_COLORS.waterUse,
+                        valueFormatter: (v) =>
+                          v == null ? "" : formatMoney(Number(v)),
+                      },
+                      {
+                        dataKey: "waterSvc",
+                        label: "Water svc",
+                        stack: "bill",
+                        color: LINE_COLORS.waterSvc,
+                        valueFormatter: (v) =>
+                          v == null ? "" : formatMoney(Number(v)),
+                      },
+                      {
+                        dataKey: "sewer",
+                        label: "Sewer",
+                        stack: "bill",
+                        color: LINE_COLORS.sewer,
+                        valueFormatter: (v) =>
+                          v == null ? "" : formatMoney(Number(v)),
+                      },
+                      {
+                        dataKey: "capital",
+                        label: "Capital",
+                        stack: "bill",
+                        color: LINE_COLORS.capital,
+                        valueFormatter: (v) =>
+                          v == null ? "" : formatMoney(Number(v)),
+                      },
+                      {
+                        dataKey: "drought",
+                        label: "Drought",
+                        stack: "bill",
+                        color: LINE_COLORS.drought,
+                        valueFormatter: (v) =>
+                          v == null ? "" : formatMoney(Number(v)),
+                      },
+                    ]}
+                    margin={{
+                      left: 8,
+                      right: 8,
+                      top: 40,
+                      bottom: 36,
+                    }}
+                    grid={{ horizontal: true }}
+                    slotProps={{
+                      legend: {
+                        direction: "horizontal",
+                        position: { vertical: "top", horizontal: "center" },
+                      },
+                      tooltip: {
+                        trigger: "axis",
+                        // Follow cursor; default axis anchor "chart" pinned tooltips oddly.
+                        anchor: "pointer",
+                        // Prefer above the cursor; Popper flips near edges.
+                        placement: "top",
+                        // Escape .card { overflow: hidden } so 2026/2027 hovers stay on-screen.
+                        container:
+                          typeof document !== "undefined"
+                            ? document.body
+                            : undefined,
+                      },
+                    }}
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      "& .MuiChartsAxis-directionX .MuiChartsAxis-tickLabel": {
+                        fill: "#111111",
+                        fontWeight: 700,
+                      },
+                      "& .MuiChartsGrid-line": {
+                        stroke: "rgba(17, 17, 17, 0.12)",
+                      },
+                      "& .MuiChartsLegend-series text": {
+                        fill: "#111111",
+                      },
+                    }}
+                  />
+                </div>
 
-            <div className="table-responsive">
-              <Table className="table-years mb-2">
-                <colgroup>
-                  <col style={{ width: LABEL_COL_PX }} />
-                  {chartYearLabels.map((y) => (
-                    <col key={y} />
-                  ))}
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th className="label-col">Line item</th>
-                    {chartYearLabels.map((y) => (
-                      <th
-                        key={y}
-                        className={`year-col${
-                          Number(y) === rateYear ? " year-current" : ""
-                        }`}
-                      >
-                        {y}
-                        {y === "2027" ? " *" : ""}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableRows.map((row) => (
-                    <tr
-                      key={row.id}
-                      className={row.emphasize ? "total-row" : undefined}
-                    >
-                      <th
-                        scope="row"
-                        className="label-col"
-                        style={{
-                          fontWeight: row.emphasize ? 700 : 600,
-                          color: row.emphasize
-                            ? "var(--ink)"
-                            : "var(--ink-soft)",
-                          fontFamily: "var(--font-display)",
-                        }}
-                      >
-                        {row.color ? (
-                          <span
-                            className="line-swatch"
-                            style={{ backgroundColor: row.color }}
-                            aria-hidden
-                          />
-                        ) : null}
-                        {row.label}
-                      </th>
-                      {row.values.map((value, idx) => {
-                        const y = Number(chartYearLabels[idx]);
-                        return (
-                          <td
-                            key={`${row.id}-${y}`}
-                            className={`year-col money${
-                              y === rateYear ? " year-current" : ""
+                <div className="table-responsive">
+                  <Table className="table-years mb-2">
+                    <colgroup>
+                      <col style={{ width: LABEL_COL_PX }} />
+                      {chartYearLabels.map((y) => (
+                        <col key={y} />
+                      ))}
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th className="label-col">Line item</th>
+                        {chartYearLabels.map((y) => (
+                          <th
+                            key={y}
+                            className={`year-col${
+                              Number(y) === rateYear ? " year-current" : ""
                             }`}
                           >
-                            {formatMoney(value)}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
-            <p className="years-footnote">
-              * 2027 is the last City-approved maximum schedule.
-            </p>
-          </Card.Body>
-        )}
+                            {y}
+                            {y === "2027" ? " *" : ""}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tableRows.map((row) => (
+                        <tr
+                          key={row.id}
+                          className={row.emphasize ? "total-row" : undefined}
+                        >
+                          <th
+                            scope="row"
+                            className="label-col"
+                            style={{
+                              fontWeight: row.emphasize ? 700 : 600,
+                              color: row.emphasize
+                                ? "var(--ink)"
+                                : "var(--ink-soft)",
+                              fontFamily: "var(--font-display)",
+                            }}
+                          >
+                            {row.color ? (
+                              <span
+                                className="line-swatch"
+                                style={{ backgroundColor: row.color }}
+                                aria-hidden
+                              />
+                            ) : null}
+                            {row.label}
+                          </th>
+                          {row.values.map((value, idx) => {
+                            const y = Number(chartYearLabels[idx]);
+                            return (
+                              <td
+                                key={`${row.id}-${y}`}
+                                className={`year-col money${
+                                  y === rateYear ? " year-current" : ""
+                                }`}
+                              >
+                                {formatMoney(value)}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+                <p className="years-footnote">
+                  * 2027 is the last City-approved maximum schedule.
+                </p>
+              </Card.Body>
+            )}
+          </div>
+        </Collapse>
+
+        <div className="amount-due">
+          <button
+            type="button"
+            className="amount-due__row"
+            aria-expanded={!!expanded.total}
+            onClick={() => toggleLine("total")}
+          >
+            <span className="amount-due__label">
+              Amount due – {rateYear}
+            </span>
+            <span className="amount-due__total money">
+              {formatMoney(totalLine.amount)}
+            </span>
+          </button>
+          <Collapse in={!!expanded.total}>
+            <p className="amount-due__formula mb-0">{totalLine.formula}</p>
+          </Collapse>
+        </div>
       </Card>
 
       <SavingsCard baseline={inputs} />

@@ -376,39 +376,43 @@ button.card-header:hover {
   gap: var(--space-3);
 }
 
+.estimated-header__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+  min-width: 0;
+}
+
+.bill-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--bs-gray-800);
+  cursor: pointer;
+}
+
+.bill-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.bill-collapse-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .bill-detail-footnote {
   font-size: 0.875rem;
   color: var(--bs-gray-600);
   font-weight: 400;
   margin: 0;
-}
-
-/* Group toggle for Estimated bill line items (Amount due stays outside) */
-.bill-lines-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  width: 100%;
-  border: 0;
-  border-bottom: 1px solid var(--glass-border-ink);
-  background: transparent;
-  padding: var(--space-3) var(--space-5);
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-
-.bill-lines-toggle:hover {
-  background: rgba(255, 255, 255, 0.35);
-}
-
-.bill-lines-toggle__label {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--bs-gray-800);
 }
 
 .amount-due {
