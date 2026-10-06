@@ -130,14 +130,15 @@ export function SavingsCard({ baseline }: Props) {
         <strong className="savings-card__em">
           {formatMoney(scenario.savings.sewer)}
         </strong>{" "}
-        savings on Sewer Charges each month.
+        savings on Sewer Charges per bill.
       </p>
 
       <p className="savings-card__note">
         Winter sewer avg scales with usage similar to the relationship in bill
         inputs. Capital Project Charges &amp; Drought Contingency remain
-        unchanged with this slider. This is only an estimate for informational
-        purposes. Actual results may vary.
+        unchanged with this slider. This estimate assumes consistent usage,
+        which is unlikely in practice — actual bills will vary. It&apos;s for
+        informational purposes only, not a hyper-accurate peek into the future.
       </p>
     </section>
   );
