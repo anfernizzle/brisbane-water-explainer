@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 const chartTheme = createTheme({
   palette: {
     mode: "light",
-    primary: { main: "#c2336f" },
+    primary: { main: "#1a73e8" },
     text: { primary: "#111111", secondary: "#555555" },
     divider: "rgba(17,17,17,0.22)",
   },
