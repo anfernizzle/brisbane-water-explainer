@@ -775,24 +775,26 @@ export function Calculator() {
           </div>
         </Collapse>
 
-        <div className="amount-due">
-          <button
-            type="button"
-            className="amount-due__row"
-            aria-expanded={!!expanded.total}
-            onClick={() => toggleLine("total")}
-          >
-            <span className="amount-due__label">
-              Amount due – {rateYear}
-            </span>
-            <span className="amount-due__total money">
-              {formatMoney(totalLine.amount)}
-            </span>
-          </button>
-          <Collapse in={!!expanded.total}>
-            <p className="amount-due__formula mb-0">{totalLine.formula}</p>
-          </Collapse>
-        </div>
+        {(resultView === "bill" || !linesOpen) && (
+          <div className="amount-due">
+            <button
+              type="button"
+              className="amount-due__row"
+              aria-expanded={!!expanded.total}
+              onClick={() => toggleLine("total")}
+            >
+              <span className="amount-due__label">
+                Bill Total – {rateYear} Rates
+              </span>
+              <span className="amount-due__total money">
+                {formatMoney(totalLine.amount)}
+              </span>
+            </button>
+            <Collapse in={!!expanded.total}>
+              <p className="amount-due__formula mb-0">{totalLine.formula}</p>
+            </Collapse>
+          </div>
+        )}
       </Card>
 
       <SavingsCard baseline={inputs} />

@@ -56,7 +56,7 @@ export function SavingsCard({ baseline }: Props) {
     <section className="savings-card" aria-labelledby="savings-card-title">
       <p className="savings-card__eyebrow" id="savings-card-title">
         <FontAwesomeIcon icon={faDroplet} className="savings-card__icon" />
-        What could I save?
+        What could you save?
       </p>
 
       <p className="savings-card__lead">

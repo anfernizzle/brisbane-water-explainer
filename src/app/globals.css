@@ -583,7 +583,7 @@ button.card-header:hover {
   font-size: 1.0625rem;
 }
 
-/* Selected-year Total: dark bar treatment matching Amount due */
+/* Selected-year Total: dark bar treatment matching Bill Total */
 .table-years .total-row td.year-current {
   font-weight: 700;
   font-size: 1.25rem;
@@ -684,7 +684,7 @@ button.card-header:hover {
   color: var(--accent-ink);
 }
 
-/* What could I save? — isolated usage what-if (Google blue, white hierarchy) */
+/* What could you save? — isolated usage what-if (Google blue, white hierarchy) */
 .savings-card {
   --savings-blue: #174ea6;
   --savings-blue-bright: #1a73e8;
