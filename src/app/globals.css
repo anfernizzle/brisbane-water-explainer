@@ -383,6 +383,34 @@ button.card-header:hover {
   margin: 0;
 }
 
+/* Group toggle for Estimated bill line items (Amount due stays outside) */
+.bill-lines-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--glass-border-ink);
+  background: transparent;
+  padding: var(--space-3) var(--space-5);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.bill-lines-toggle:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.bill-lines-toggle__label {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bs-gray-800);
+}
+
 .amount-due {
   background: var(--glass-amount);
   backdrop-filter: blur(14px) saturate(1.1);

@@ -109,6 +109,7 @@ export function Calculator() {
   const [droughtMode, setDroughtMode] = useState<DroughtPresetId>("above");
 
   const [inputsOpen, setInputsOpen] = useState(true);
+  const [linesOpen, setLinesOpen] = useState(true);
   const [resultView, setResultView] = useState<ResultView>("bill");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const inputsAnchorRef = useRef<HTMLButtonElement | null>(null);
@@ -200,6 +201,10 @@ export function Calculator() {
 
   function toggleInputs() {
     setInputsOpen((v) => !v);
+  }
+
+  function toggleLines() {
+    setLinesOpen((v) => !v);
   }
 
   function toggleLine(id: string) {
@@ -515,7 +520,7 @@ export function Calculator() {
               </button>
             </div>
           </div>
-          {resultView === "bill" && (
+          {resultView === "bill" && linesOpen && (
             <p className="bill-detail-footnote mb-0">
               Tap any line to see how it&apos;s calculated.
             </p>
@@ -524,34 +529,52 @@ export function Calculator() {
 
         {resultView === "bill" ? (
           <>
-            <Card.Body className="py-2 px-2">
-              {lineItems.map((line) => {
-                const isOpen = !!expanded[line.id];
-                return (
-                  <div key={line.id}>
-                    <button
-                      type="button"
-                      className="bill-line"
-                      aria-expanded={isOpen}
-                      onClick={() => toggleLine(line.id)}
-                    >
-                      <FontAwesomeIcon
-                        icon={isOpen ? faChevronDown : faChevronRight}
-                        className="bill-line__chevron"
-                        aria-hidden
-                      />
-                      <span className="bill-line__label">{line.label}</span>
-                      <span className="bill-line__amount money">
-                        {formatMoney(line.amount)}
-                      </span>
-                    </button>
-                    <Collapse in={isOpen}>
-                      <p className="bill-line__formula">{line.formula}</p>
-                    </Collapse>
-                  </div>
-                );
-              })}
-            </Card.Body>
+            <button
+              type="button"
+              className="bill-lines-toggle"
+              onClick={toggleLines}
+              aria-expanded={linesOpen}
+              aria-controls="bill-lines-panel"
+            >
+              <span className="bill-lines-toggle__label">Line items</span>
+              <FontAwesomeIcon
+                icon={linesOpen ? faCaretUp : faCaretDown}
+                className="collapse-caret"
+                aria-hidden
+              />
+            </button>
+            <Collapse in={linesOpen}>
+              <div id="bill-lines-panel">
+                <Card.Body className="py-2 px-2">
+                  {lineItems.map((line) => {
+                    const isOpen = !!expanded[line.id];
+                    return (
+                      <div key={line.id}>
+                        <button
+                          type="button"
+                          className="bill-line"
+                          aria-expanded={isOpen}
+                          onClick={() => toggleLine(line.id)}
+                        >
+                          <FontAwesomeIcon
+                            icon={isOpen ? faChevronDown : faChevronRight}
+                            className="bill-line__chevron"
+                            aria-hidden
+                          />
+                          <span className="bill-line__label">{line.label}</span>
+                          <span className="bill-line__amount money">
+                            {formatMoney(line.amount)}
+                          </span>
+                        </button>
+                        <Collapse in={isOpen}>
+                          <p className="bill-line__formula">{line.formula}</p>
+                        </Collapse>
+                      </div>
+                    );
+                  })}
+                </Card.Body>
+              </div>
+            </Collapse>
             <div className="amount-due">
               <button
                 type="button"
