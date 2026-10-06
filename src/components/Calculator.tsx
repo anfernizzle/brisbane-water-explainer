@@ -404,7 +404,9 @@ export function Calculator() {
                     label="Capital project charge"
                     tip={
                       <span>
-                        Auto from entered water use as a proxy for the City{" "}
+                        Based on average water use from mid-February through
+                        mid-June. The resulting charge is reset once a year on
+                        the August bill. See the City{" "}
                         <a
                           href="https://www.brisbaneca.gov/513/Capital-Projects-Charge"
                           target="_blank"
@@ -412,10 +414,7 @@ export function Calculator() {
                         >
                           Capital Projects Charge
                         </a>{" "}
-                        bands. Based on average water use from mid-February
-                        through mid-June. The resulting charge is reset once a
-                        year on the August bill. Pick another band if your bill
-                        differs.
+                        page. Pick another band if your bill differs.
                       </span>
                     }
                   />
