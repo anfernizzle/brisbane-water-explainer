@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
+  Alert,
   ButtonGroup,
   Card,
   Col,
@@ -689,37 +690,35 @@ export function Calculator() {
       </Card>
 
       {/* DISCLAIMER */}
-      <Card className="disclaimer-card">
-        <Card.Body>
-          <div className="disclaimer-split">
-            <div>
-              <h2 className="disclaimer-card__title">Unofficial explainer</h2>
-              <p className="footnote mb-0">
-                This is <strong>not</strong> an official City of Brisbane tool.
-                It estimates residential water/sewer bills from published rate
-                tables and Prop 218 maximums. Capital and drought
-                auto-suggestions use your entered water use as a proxy (City
-                capital bands are spring usage; drought uses a yearly average vs
-                median 12) — pick another band or tier when your bill differs.
-                Does not include LIRA, AB 3030 pass-throughs, late fees, or prior
-                balances. Always trust your actual bill.
-              </p>
-            </div>
-            <div>
-              <h2 className="disclaimer-card__title">Sources</h2>
-              <ul className="disclaimer-card__sources">
-                {SOURCE_LINKS.map((s) => (
-                  <li key={s.href}>
-                    <a href={s.href} target="_blank" rel="noopener noreferrer">
-                      {s.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      <Alert variant="primary" className="disclaimer-alert mb-0">
+        <div className="disclaimer-split">
+          <div>
+            <h2 className="disclaimer-alert__title">Unofficial explainer</h2>
+            <p className="footnote mb-0">
+              This is <strong>not</strong> an official City of Brisbane tool. It
+              estimates residential water/sewer bills from published rate tables
+              and Prop 218 maximums. Capital and drought auto-suggestions use
+              your entered water use as a proxy (City capital bands are spring
+              usage; drought uses a yearly average vs median 12) — pick another
+              band or tier when your bill differs. Does not include LIRA, AB
+              3030 pass-throughs, late fees, or prior balances. Always trust
+              your actual bill.
+            </p>
           </div>
-        </Card.Body>
-      </Card>
+          <div>
+            <h2 className="disclaimer-alert__title">Sources</h2>
+            <ul className="disclaimer-alert__sources">
+              {SOURCE_LINKS.map((s) => (
+                <li key={s.href}>
+                  <a href={s.href} target="_blank" rel="noopener noreferrer">
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </Alert>
     </div>
   );
 }
