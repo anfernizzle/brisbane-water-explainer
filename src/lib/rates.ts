@@ -159,16 +159,8 @@ export const DROUGHT_PRESETS = [
   },
 ] as const;
 
-/** Official City + Prop 218 citations shown in the disclaimer. */
+/** Official City + Prop 218 citations shown in the disclaimer (bill line order, then rest). */
 export const SOURCE_LINKS = [
-  {
-    label: "Capital Projects Charge (official)",
-    href: "https://www.brisbaneca.gov/513/Capital-Projects-Charge",
-  },
-  {
-    label: "Drought Contingency Charge (official)",
-    href: "https://www.brisbaneca.gov/512/Drought-Contingency-Charge",
-  },
   {
     label: "Residential water rate table",
     href: "https://www.brisbaneca.gov/514/Water-Rate-Table---Residential",
@@ -176,6 +168,14 @@ export const SOURCE_LINKS = [
   {
     label: "Sewer rate table",
     href: "https://www.brisbaneca.gov/517/Sewer-Rate-Table---Residential-Commercia",
+  },
+  {
+    label: "Capital Projects Charge (official)",
+    href: "https://www.brisbaneca.gov/513/Capital-Projects-Charge",
+  },
+  {
+    label: "Drought Contingency Charge (official)",
+    href: "https://www.brisbaneca.gov/512/Drought-Contingency-Charge",
   },
   {
     label: "Prop 218 notice (2023–2027 maxima)",
