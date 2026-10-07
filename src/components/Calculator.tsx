@@ -385,12 +385,14 @@ export function Calculator() {
                     label="Winter sewer avg"
                     tip={
                       <span>
-                        Mid-Oct → mid-Feb average that{" "}
-                        <strong>directly sets the sewer charge</strong> (
+                        This is your avg. usage measured from Mid-Oct → mid-Feb.
+                        That number directly sets the sewer charge (
                         {formatMoney(sewerRates.variable)}/ccf in {rateYear} +
-                        fixed). Default is water use × 1.15 (nearest 0.5) — an
-                        estimate; check your bill and correct it. Clear the
-                        field to let water use drive it again.
+                        fixed). For this tool the default value is water use ×
+                        1.15 (rounded to the nearest 0.5) as an estimate. For
+                        more accurate personalized results check your most
+                        recent bill and adjust this number until the dollar
+                        value matches.
                       </span>
                     }
                   />
